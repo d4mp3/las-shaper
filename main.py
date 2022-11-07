@@ -12,8 +12,10 @@ DEM_XYZ = './data/exports/dem.xyz'
 bud_file = './data/shp/buildings.shp'
 buildings = gpd.read_file(bud_file)
 
+test_points = gpd.read_file('./data/shp/points_test.shp')
 
-def extract_las_classification(in_path, out_path):
+
+def extract_las_class(in_path, out_path):
     pathlist = Path(in_path).glob('**/*.las')
     results = out_path + '/las_result.las'
     
@@ -42,7 +44,7 @@ def create_xyz_from_las(las, out_path):
     savetxt(out_path + '/buildings_xyz.xyz', xyz, delimiter = ' ')
 
 
-def merge_multiple_xyz_files(in_path, out_path):
+def merge_xyz_files(in_path, out_path):
     pathlist = Path(in_path).glob('**/*.xyz')
     new_file = open(out_path + '/dem.xyz', 'a')
     
@@ -73,20 +75,42 @@ def create_gdf_from_xyz(xyz_file):
 
         line = line.split()
         df = pd.DataFrame({'x': [float(line[0])], 'y': [float(line[1])], 'z': [float(line[2])]})
-        geometry = gpd.points_from_xy(df['x'], df['y'], df['z'])
+        # geometry = gpd.points_from_xy(df['x'], df['y'], df['z'])
         gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df['x'], df['y']))
+        
+        if buildings.contains(gdf):
+            print(True)
         
         print("Processed {} line of 1600000".format(count+1))              
         count += 1
 
-print("Calling extract_las_classification")
-trimmed_las = extract_las_classification(IN_LAS, OUT_PATH)
-print("Calling create_xyz_from_las")
-create_xyz_from_las(trimmed_las, OUT_PATH)
-print("Calling merge_multiple_xyz_files")
-merge_multiple_xyz_files(IN_XYZ, OUT_PATH)
-print("Calling create_gdf_from_xyz")
-create_gdf_from_xyz(DEM_XYZ)
+        
+def inside_polygon(shp):
+    tmp_list = [] 
+    for row_point in shp.iterrows():
+        for row_poly in buildings.iterrows():
+            if row_poly[1][13].contains(row_point[1][1]):
+                tmp_list.append(row_point[1])
+    gdf = gpd.GeoDataFrame(tmp_list)
+    gdf = gdf.set_crs('epsg:2178')
+   
+    return gdf
+
+
+
+# print("Calling extract_las_classification")
+# trimmed_las = extract_las_class(IN_LAS, OUT_PATH)
+# print("Calling create_xyz_from_las")
+# create_xyz_from_las(trimmed_las, OUT_PATH)
+# print("Calling merge_multiple_xyz_files")
+# merge_xyz_files(IN_XYZ, OUT_PATH)
+# print("Calling create_gdf_from_xyz")
+# create_gdf_from_xyz(DEM_XYZ)
+
+a = inside_polygon(test_points)
+
+a.to_file('./data/shp/results_test.shp')
+
 
 
 
