@@ -3,6 +3,7 @@ import pandas as pd
 import laspy
 from pathlib import Path
 from numpy import savetxt
+import time
 
 
 OUT_PATH = './data/exports'
@@ -106,7 +107,7 @@ def create_gdf_from_single_xyz(in_path, out_path):
             gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df['x'],
                                                                    df['y']))
         
-            a = inside_polygon(gdf['geometry'], buildings, dataframes)
+            a = inside_polygon(gdf['geometry'], buildings)
             
             if a is True:
                 dataframes.append(gdf)
@@ -114,23 +115,24 @@ def create_gdf_from_single_xyz(in_path, out_path):
             
             if count > 1000:
                 break
-            results = gpd.GeoDataFrame(pd.concat(dataframes, ignore_index=True))
+            
             
             print("Processed {} lines".format(count+1))
             count += 1
 
-        return results
+        return gpd.GeoDataFrame(pd.concat(dataframes, ignore_index=True))
         break
 
-def inside_polygon(geom, poly, dataframes):
+def inside_polygon(geom, poly):
     for row in poly.iterrows():
         if str(geom.within(row[1][13])[0]) == 'True':
             return True
         
         
-
+start_time = time.time()
 b = create_gdf_from_single_xyz(IN_XYZ, OUT_PATH)
 b.to_file('./data/shp/results_test.shp')
+print("--- %s seconds ---" % (time.time() - start_time))
 
 # print("Calling extract_las_classification")
 # trimmed_las = extract_las_class(IN_LAS, OUT_PATH)
