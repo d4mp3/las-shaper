@@ -15,27 +15,52 @@ buildings = gpd.read_file(bud_file)
 
 def extract_las_class(inpath, outpath):
     print("Calling extract_las_classification")
-    pathlist = Path(inpath).glob('**/*.las')
+    pathlist = list(Path(inpath).glob('**/*.las'))
     out = outpath + '/las' + '/las_result.las'
-
-    for path in pathlist:
+    
+    if Path(outpath + '/las').exists() is False:
+        os.mkdir(outpath + '/las')
+    
+    for counter, path in enumerate(pathlist):
+        filename = Path(path).stem
+        print("Processing {} ({} file of {})".format(filename, counter, len(pathlist)))
         if Path(out).exists() is False:
             input_las = laspy.read(path)
             new_file = laspy.create(
                 point_format=input_las.header.point_format, 
                 file_version=input_las.header.version)
             new_file.points = input_las.points[input_las.classification == 6]
+            print("Saving results to file...")
             new_file.write(out)
         else:
-            print(path)
             input_las = laspy.read(path)
             with laspy.open(out, mode="a") as ground_las:
                 if (len(input_las.points[input_las.classification == 6]) == 0):
                     continue
                 else:
+                    print("Saving results to file...")
                     ground_las.append_points(
                         input_las.points[input_las.classification == 6])
+                    
     return outpath
+
+
+def create_shp_from_xyz(xyz, outpath):
+    print("Calling shp_from_xyz")
+    df = pd.read_csv(xyz, sep='\t', header = None)
+    df.columns = ['x', 'y', 'z']
+    points = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df['x'], df['y']))
+    points = points.set_crs(2178, allow_override=True)
+    
+    if Path(outpath + '/shp').exists() is False:
+        os.mkdir(outpath + '/shp')
+        print("Saving results to file...")
+        points.to_file(outpath + '/shp//buildings.shp', mode='w')
+    else:
+        print("Saving results to file...")
+        points.to_file(outpath + '/shp//buildings.shp', mode='w')
+        
+    return points
 
 
 def create_xyz_from_las(las, outpath):
@@ -45,9 +70,12 @@ def create_xyz_from_las(las, outpath):
     out = outpath + '/xyz' + '/buildings_xyz.xyz'
     if Path(outpath + '/xyz').exists() is False:
         os.mkdir(outpath + '/xyz')
-        savetxt(out, xyz, delimiter=' ')
+        print("Saving results to file...")
+        savetxt(out, xyz, delimiter='\t')
     else:
-        savetxt(out, xyz, delimiter=' ')
+        print("Saving results to file...")
+        savetxt(out, xyz, delimiter='\t')
+
 
 def merge_xyz_files(inpath, outpath):
     print("Calling merge_multiple_xyz_files")
@@ -69,7 +97,7 @@ def dem_handler(inpath, outpath, poly):
     pathlist = list(Path(inpath).glob('**/*.xyz'))
     counter = 1
     
-    for path in pathlist:
+    for counter, path in enumerate(pathlist):
         filename = Path(path).stem
         print("Processing {} ({} file of {})".format(filename, counter, len(pathlist)))
         df = pd.read_csv(path, sep='\t', header = None)
@@ -83,10 +111,9 @@ def dem_handler(inpath, outpath, poly):
             print("Saving results to file...")
             if Path(outpath + '/shp').exists() is False:
                 os.mkdir(outpath + '/shp')
-                results.to_file(outpath + '/shp//' + filename + '.shp', mode='w')
+                results.to_file(outpath + '/shp//dem//' + filename + '.shp', mode='w')
             else:
-                results.to_file(outpath + '/shp//' + filename + '.shp', mode='w')
-        counter += 1
+                results.to_file(outpath + '/shp//dem//' + filename + '.shp', mode='w')
        
 
 def intersect_using_spatial_index(source_gdf, intersecting_gdf):
@@ -114,7 +141,10 @@ def intersect_using_spatial_index(source_gdf, intersecting_gdf):
     return result
 
         
-# trimmed_las = extract_las_class(IN_LAS, OUT_PATH)
-# create_xyz_from_las(trimmed_las, OUT_PATH)
-# merge_xyz_files(IN_XYZ, OUT_PATH)
-dem_handler(IN_XYZ, OUTPATH, buildings)
+# trimmed_las = extract_las_class(IN_LAS, OUTPATH)
+# create_xyz_from_las(trimmed, OUTPATH)
+# merge_xyz_files(IN_XYZ, OUTPATH)
+# dem_handler(IN_XYZ, OUTPATH, buildings)
+create_shp_from_xyz('./data/exports/xyz/buildings_xyz.xyz', OUTPATH)
+
+# df = pd.read_csv('./data/exports/xyz/buildings_xyz.xyz', sep='\t', header = None)
