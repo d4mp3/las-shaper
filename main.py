@@ -173,7 +173,7 @@ def intersect_using_spatial_index(source_gdf, intersecting_gdf):
     return result
 
 
-def get_max_value(poly, points):
+def get_max_value(poly, points, outpath):
     print("Calling get_max_value")
     poly = gpd.read_file(poly)
     print("Loaded poly layer")
@@ -188,9 +188,18 @@ def get_max_value(poly, points):
         print("Processing sjoin")
         points = points.to_crs(poly.crs)
         join = gpd.sjoin(points, poly, how='inner', op='within')
-        
-    # results = shp1.dissolve(by=shp2)
     
+    join['z'] = pd.to_numeric(join['z'])  
+    join = join.groupby('IDB', sort=False)['z'].max()
+    
+    results = buildings.merge(join, on='IDB', how='outer)
+    
+    print("Saving results to file...")
+    if Path(outpath + '/shp').exists() is False:
+        os.mkdir(outpath + '/shp')
+        results.to_file(outpath + '/shp/buildings_with_z_value.shp', mode='w')
+    else:
+        results.to_file(outpath + '/shp/buildings_with_z_value.shp', mode='w')
     
     return join
 
@@ -201,7 +210,7 @@ def get_max_value(poly, points):
 # dem_handler(IN_XYZ, OUTPATH, buildings)
 # create_shp_from_xyz('./data/exports/xyz/buildings_xyz.xyz', OUTPATH)
 # merge_shp_files('./data/exports/shp/dem', OUTPATH)
-a = get_max_value(bud_file, './data/exports/shp/dem_results.shp')
+b = get_max_value(bud_file, './data/shp/points_test.shp', OUTPATH)
 
 
 
