@@ -1,3 +1,11 @@
+'''
+    TODO:    
+
+        - set crs as functions' argument
+        - set attributes to join by sjoin
+        - create class
+        
+'''
 import geopandas as gpd
 import pandas as pd
 import laspy
@@ -58,7 +66,7 @@ def create_shp_from_xyz(xyz, outpath):
         points.to_file(outpath + '/shp//buildings.shp', mode='w')
     else:
         print("Saving results to file...")
-        points.to_file(outpath + '/shp//buildings.shp', mode='w')
+        points.to_file(outpath + '/shp//buildings_class.shp', mode='w')
         
     return points
 
@@ -138,7 +146,7 @@ def dem_handler(inpath, outpath, poly):
                 results.to_file(outpath + '/shp//dem//' + filename + '.shp', mode='w')
             else:
                 results.to_file(outpath + '/shp//dem//' + filename + '.shp', mode='w')
-       
+        
 
 def intersect_using_spatial_index(source_gdf, intersecting_gdf):
     """
@@ -164,12 +172,37 @@ def intersect_using_spatial_index(source_gdf, intersecting_gdf):
     result = possible_matches.loc[possible_matches.intersects(intersecting_gdf.unary_union)]
     return result
 
+
+def get_max_value(poly, points):
+    print("Calling get_max_value")
+    poly = gpd.read_file(poly)
+    print("Loaded poly layer")
+    poly = poly[['IDB', 'geometry']]
+    points = gpd.read_file(points)
+    print("Loaded points layer")
+    
+    if poly.crs == points.crs:
+        print("Processing sjoin")
+        join = gpd.sjoin(points, poly, how='inner', op='within')
+    else:
+        print("Processing sjoin")
+        points = points.to_crs(poly.crs)
+        join = gpd.sjoin(points, poly, how='inner', op='within')
+        
+    # results = shp1.dissolve(by=shp2)
+    
+    
+    return join
+
         
 # trimmed_las = extract_las_class(IN_LAS, OUTPATH)
 # create_xyz_from_las(trimmed, OUTPATH)
 # merge_xyz_files(IN_XYZ, OUTPATH)
 # dem_handler(IN_XYZ, OUTPATH, buildings)
 # create_shp_from_xyz('./data/exports/xyz/buildings_xyz.xyz', OUTPATH)
-merge_shp_files('./data/exports/shp/dem', OUTPATH)
+# merge_shp_files('./data/exports/shp/dem', OUTPATH)
+a = get_max_value(bud_file, './data/exports/shp/dem_results.shp')
+
+
 
 # df = pd.read_csv('./data/exports/xyz/buildings_xyz.xyz', sep='\t', header = None)
