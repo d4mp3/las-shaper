@@ -23,7 +23,7 @@ def extract_las_class(inpath, outpath):
     
     for counter, path in enumerate(pathlist):
         filename = Path(path).stem
-        print("Processing {} ({} file of {})".format(filename, counter, len(pathlist)))
+        print("Processing {} ({} of {})".format(filename, counter + 1, len(pathlist)))
         if Path(out).exists() is False:
             input_las = laspy.read(path)
             new_file = laspy.create(
@@ -76,11 +76,36 @@ def create_xyz_from_las(las, outpath):
         print("Saving results to file...")
         savetxt(out, xyz, delimiter='\t')
 
+def merge_shp_files(inpath, outpath):
+    print("Calling merge_shp_files")
+    pathlist = list(Path(inpath).glob('**/*.shp'))
+   
+    for counter, path in enumerate(pathlist):
+        if counter == 0:
+            filename = Path(path).stem
+            print("Processing {} ({} of {})".format(filename, counter + 1, len(pathlist)))
+            gdfs = gpd.read_file(path)
+            gdfs.set_crs(2178, allow_override=True)
+        else:
+            filename = Path(path).stem
+            print("Processing {} ({} of {})".format(filename, counter + 1, len(pathlist)))
+            gdf = gpd.read_file(path)
+            gdf.set_crs(2178, allow_override=True)
+            gdfs = gpd.pd.concat([gdfs, gdf])
+        
+    results = gpd.pd.concat([gdfs])
+    print("Saving results to file...")
+    if Path(outpath + '/shp').exists() is False:
+        os.mkdir(outpath + '/shp')
+        results.to_file(outpath + '/shp/dem_results.shp', mode='w')
+    else:
+        results.to_file(outpath + '/shp/dem_results.shp', mode='w')
+
 
 def merge_xyz_files(inpath, outpath):
-    print("Calling merge_multiple_xyz_files")
+    print("Calling merge_xyz_files")
     pathlist = Path(inpath).glob('**/*.xyz')
-    new_file = open(outpath + '/xyz/' + '/dem.xyz', 'a')
+    new_file = open(outpath + '/xyz/dem.xyz', 'a')
 
     for path in pathlist:
         xyz_file = open(path, 'r')
@@ -95,11 +120,10 @@ def merge_xyz_files(inpath, outpath):
 def dem_handler(inpath, outpath, poly):
     print("Calling create_gdf_from_xyz")
     pathlist = list(Path(inpath).glob('**/*.xyz'))
-    counter = 1
     
     for counter, path in enumerate(pathlist):
         filename = Path(path).stem
-        print("Processing {} ({} file of {})".format(filename, counter, len(pathlist)))
+        print("Processing {} ({} of {})".format(filename, counter + 1, len(pathlist)))
         df = pd.read_csv(path, sep='\t', header = None)
         df.columns = ['x', 'y', 'z']
         points = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df['x'], df['y']))
@@ -145,6 +169,7 @@ def intersect_using_spatial_index(source_gdf, intersecting_gdf):
 # create_xyz_from_las(trimmed, OUTPATH)
 # merge_xyz_files(IN_XYZ, OUTPATH)
 # dem_handler(IN_XYZ, OUTPATH, buildings)
-create_shp_from_xyz('./data/exports/xyz/buildings_xyz.xyz', OUTPATH)
+# create_shp_from_xyz('./data/exports/xyz/buildings_xyz.xyz', OUTPATH)
+merge_shp_files('./data/exports/shp/dem', OUTPATH)
 
 # df = pd.read_csv('./data/exports/xyz/buildings_xyz.xyz', sep='\t', header = None)
