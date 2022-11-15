@@ -177,7 +177,6 @@ def get_max_value(poly, dem_points, bldg_points, outpath):
     print("Calling get_max_value")
     print("Loading polygon layer...")
     poly = gpd.read_file(poly)
-    poly = poly[['IDB', 'geometry']]
     print("Loading dem points layer...")
     dem_points = gpd.read_file(dem_points)
     print("Loading buildings points layer...")
@@ -188,17 +187,17 @@ def get_max_value(poly, dem_points, bldg_points, outpath):
         results = poly
         for idx, x in enumerate(points):
             if poly.crs == points[idx].crs:
-                print("Processing sjoin")
+                print("Processing sjoin ({} of 2)".format(idx+1))
                 join = gpd.sjoin(points[idx], poly, how='inner', op='within')
             else:
-                print("Processing sjoin")
+                print("Processing sjoin ({} of 2)".format(idx+1))
                 points = points[idx].to_crs(poly.crs)
                 join = gpd.sjoin(points[idx], poly, how='inner', op='within')
         
             join['z'] = pd.to_numeric(join['z'])
             new_name = 'z_{}'.format(idx)
             join = join.rename(columns={'z': new_name})
-            join = join.groupby('IDB', sort=False)[new_name].max()
+            join = join.groupby('IDB', sort=False)[new_name].mean()
         
             results = results.merge(join, on='IDB', how='outer')
         
@@ -210,9 +209,9 @@ def get_max_value(poly, dem_points, bldg_points, outpath):
     print("Saving results to file...")
     if Path(outpath + '/shp').exists() is False:
         os.mkdir(outpath + '/shp')
-        outcome.to_file(outpath + '/shp/buildings_with_z_value.shp', mode='w')
+        outcome.to_file(outpath + '/shp/buildings_with_max_z_value.shp', mode='w')
     else:
-        outcome.to_file(outpath + '/shp/buildings_with_z_value.shp', mode='w')
+        outcome.to_file(outpath + '/shp/buildings_with_max_z_value.shp', mode='w')
 
         
 # trimmed_las = extract_las_class(IN_LAS, OUTPATH)
@@ -222,5 +221,3 @@ def get_max_value(poly, dem_points, bldg_points, outpath):
 # create_shp_from_xyz('./data/exports/xyz/buildings_xyz.xyz', OUTPATH)
 # merge_shp_files('./data/exports/shp/dem', OUTPATH)
 b = get_max_value(bud_file, './data/exports/shp/dem_results.shp', './data/exports/shp/buildings.shp', OUTPATH)
-
-
