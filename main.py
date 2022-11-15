@@ -175,13 +175,13 @@ def intersect_using_spatial_index(source_gdf, intersecting_gdf):
 
 def get_max_value(poly, dem_points, bldg_points, outpath):
     print("Calling get_max_value")
+    print("Loading polygon layer...")
     poly = gpd.read_file(poly)
-    print("Loaded poly layer")
     poly = poly[['IDB', 'geometry']]
+    print("Loading dem points layer...")
     dem_points = gpd.read_file(dem_points)
-    print("Loaded dem points layer")
+    print("Loading buildings points layer...")
     bldg_points = gpd.read_file(bldg_points)
-    print("Loaded buildings points layer")
         
     def spatial_join(poly, points):
         print("Calling spatial_join")
