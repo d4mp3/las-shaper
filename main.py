@@ -173,35 +173,46 @@ def intersect_using_spatial_index(source_gdf, intersecting_gdf):
     return result
 
 
-def get_max_value(poly, points, outpath):
+def get_max_value(poly, dem_points, bldg_points, outpath):
     print("Calling get_max_value")
     poly = gpd.read_file(poly)
     print("Loaded poly layer")
     poly = poly[['IDB', 'geometry']]
-    points = gpd.read_file(points)
-    print("Loaded points layer")
-    
-    if poly.crs == points.crs:
-        print("Processing sjoin")
-        join = gpd.sjoin(points, poly, how='inner', op='within')
-    else:
-        print("Processing sjoin")
-        points = points.to_crs(poly.crs)
-        join = gpd.sjoin(points, poly, how='inner', op='within')
-    
-    join['z'] = pd.to_numeric(join['z'])  
-    join = join.groupby('IDB', sort=False)['z'].max()
-    
-    results = buildings.merge(join, on='IDB', how='outer)
+    dem_points = gpd.read_file(dem_points)
+    print("Loaded dem points layer")
+    bldg_points = gpd.read_file(bldg_points)
+    print("Loaded buildings points layer")
+        
+    def spatial_join(poly, points):
+        print("Calling spatial_join")
+        results = poly
+        for idx, x in enumerate(points):
+            if poly.crs == points[idx].crs:
+                print("Processing sjoin")
+                join = gpd.sjoin(points[idx], poly, how='inner', op='within')
+            else:
+                print("Processing sjoin")
+                points = points[idx].to_crs(poly.crs)
+                join = gpd.sjoin(points[idx], poly, how='inner', op='within')
+        
+            join['z'] = pd.to_numeric(join['z'])
+            new_name = 'z_{}'.format(idx)
+            join = join.rename(columns={'z': new_name})
+            join = join.groupby('IDB', sort=False)[new_name].max()
+        
+            results = results.merge(join, on='IDB', how='outer')
+        
+        return results
+   
+    outcome = spatial_join(poly, [dem_points, bldg_points])
+    outcome['delta_z'] = outcome['z_1'] - outcome['z_0']
     
     print("Saving results to file...")
     if Path(outpath + '/shp').exists() is False:
         os.mkdir(outpath + '/shp')
-        results.to_file(outpath + '/shp/buildings_with_z_value.shp', mode='w')
+        outcome.to_file(outpath + '/shp/buildings_with_z_value.shp', mode='w')
     else:
-        results.to_file(outpath + '/shp/buildings_with_z_value.shp', mode='w')
-    
-    return join
+        outcome.to_file(outpath + '/shp/buildings_with_z_value.shp', mode='w')
 
         
 # trimmed_las = extract_las_class(IN_LAS, OUTPATH)
@@ -210,8 +221,6 @@ def get_max_value(poly, points, outpath):
 # dem_handler(IN_XYZ, OUTPATH, buildings)
 # create_shp_from_xyz('./data/exports/xyz/buildings_xyz.xyz', OUTPATH)
 # merge_shp_files('./data/exports/shp/dem', OUTPATH)
-b = get_max_value(bud_file, './data/shp/points_test.shp', OUTPATH)
+b = get_max_value(bud_file, './data/exports/shp/dem_results.shp', './data/exports/shp/buildings.shp', OUTPATH)
 
 
-
-# df = pd.read_csv('./data/exports/xyz/buildings_xyz.xyz', sep='\t', header = None)
