@@ -1,9 +1,12 @@
 '''
     TODO:    
 
-        - set crs as functions' argument
-        - set attributes to join by sjoin
-        - create class
+        - crs as functions' argument for define your own crs
+        - accessing of more attributes for spatial_join function
+        - create App class
+        - create common load_files_path function
+        - create common save_files function
+        - try to ommit converting las file to xyz for dem_handler purposes
         
 '''
 import geopandas as gpd
@@ -20,7 +23,6 @@ DEM_XYZ = './data/exports/dem.xyz'
 bud_file = './data/shp/buildings.shp'
 buildings = gpd.read_file(bud_file)
 
-
 def extract_las_class(inpath, outpath):
     print("Calling extract_las_classification")
     pathlist = list(Path(inpath).glob('**/*.las'))
@@ -29,6 +31,7 @@ def extract_las_class(inpath, outpath):
     if Path(outpath + '/las').exists() is False:
         os.mkdir(outpath + '/las')
     
+    # iterates through files, checks file existing, selects right lidar data class
     for counter, path in enumerate(pathlist):
         filename = Path(path).stem
         print("Processing {} ({} of {})".format(filename, counter + 1, len(pathlist)))
@@ -84,6 +87,7 @@ def create_xyz_from_las(las, outpath):
         print("Saving results to file...")
         savetxt(out, xyz, delimiter='\t')
 
+
 def merge_shp_files(inpath, outpath):
     print("Calling merge_shp_files")
     pathlist = list(Path(inpath).glob('**/*.shp'))
@@ -124,7 +128,7 @@ def merge_xyz_files(inpath, outpath):
     xyz_file.close()
     new_file.close()
 
-
+# cuts xyz records to the bounds of buildings
 def dem_handler(inpath, outpath, poly):
     print("Calling create_gdf_from_xyz")
     pathlist = list(Path(inpath).glob('**/*.xyz'))
@@ -181,7 +185,9 @@ def get_max_value(poly, dem_points, bldg_points, outpath):
     dem_points = gpd.read_file(dem_points)
     print("Loading buildings points layer...")
     bldg_points = gpd.read_file(bldg_points)
-        
+    
+    # checks if one point of points' list is in polygon geometry
+    # if True joins attributes    
     def spatial_join(poly, points):
         print("Calling spatial_join")
         results = poly
@@ -193,7 +199,7 @@ def get_max_value(poly, dem_points, bldg_points, outpath):
                 print("Processing sjoin ({} of 2)".format(idx+1))
                 points = points[idx].to_crs(poly.crs)
                 join = gpd.sjoin(points[idx], poly, how='inner', op='within')
-        
+            
             join['z'] = pd.to_numeric(join['z'])
             new_name = 'z_{}'.format(idx)
             join = join.rename(columns={'z': new_name})
@@ -220,4 +226,4 @@ def get_max_value(poly, dem_points, bldg_points, outpath):
 # dem_handler(IN_XYZ, OUTPATH, buildings)
 # create_shp_from_xyz('./data/exports/xyz/buildings_xyz.xyz', OUTPATH)
 # merge_shp_files('./data/exports/shp/dem', OUTPATH)
-b = get_max_value(bud_file, './data/exports/shp/dem_results.shp', './data/exports/shp/buildings.shp', OUTPATH)
+# b = get_max_value(bud_file, './data/exports/shp/dem_results.shp', './data/exports/shp/buildings.shp', OUTPATH)
