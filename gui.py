@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter import filedialog
+from tkinter.filedialog import asksaveasfile
 from classification_codes import CLASSIFICATION_CODES
 
 
@@ -16,14 +17,25 @@ class Gui():
         quit_btn.grid(row=3, column=2, sticky="w", padx=10)
 
 
-    def get_path(self, var, entry):
-        extensions = (("las files", "*.las"), ("xyz files", "*.xyz"),("shp files", "*.las") ,("all files", "*.*"))
-        file_name = filedialog.askopenfilename(title="Browse for file", filetypes=(extensions))
+    def get_path(self, action, entry):
+        file_name= ()
+        extensions = (("las files", "*.las"), ("xyz files", "*.xyz"), ("shp files", "*.shp"), ("all files", "*.*"))
 
-        self.input_path.set(file_name) if var == "[Input path]" else self.output_path.set(file_name)
+        if action == "open":
+            file_name = filedialog.askopenfilename(title="Browse for file", filetypes=(extensions))
+        else:
+            file_name = asksaveasfile(mode="w", initialfile = 'Untitled.las', defaultextension=".las", filetypes=extensions)
 
-        entry.delete(0, END)
-        entry.insert(0, self.input_path.get())
+        print(file_name)
+        if file_name != () and action == "open":
+            self.input_path.set(file_name)
+            entry.delete(0, END)
+            entry.insert(0, self.input_path.get())
+        elif file_name != () and action == "save":
+            self.output_path.set(file_name.name)
+            entry.delete(0, END)
+            entry.insert(0, self.output_path.get())
+
 
 
     def caller(self, entry_textm, cb):
@@ -45,8 +57,8 @@ class Gui():
         self.output_path.set("[Output path]")
         output.insert(0, self.output_path.get())
 
-        input_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path(self.input_path.get(), input))
-        output_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path(self.output_path.get(), output))
+        input_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path("open", input))
+        output_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path("save", output))
         run_btn = Button(frame, text="RUN", padx=10, command=self.caller)
 
         cassification_label.grid(row=0, column=0, padx=10, pady=10, sticky="w")
