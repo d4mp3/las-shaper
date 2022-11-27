@@ -10,15 +10,19 @@ class Gui():
         self.root = Tk()
         self.root.title("Las2Shp")
 
-        # variables
+        # definition of common variables
         self.input_path = StringVar()
         self.output_path = StringVar()
         self.merged_files_types = {
-            '0': ['.xyz', 'xyz files'],
-            '1': ['.shp', 'shp files'],
+            "0": ["xyz files", ".xyz"],
+            "1": ["shp files", ".shp"],
+        }
+        self.created_files_type = {
+            "0": [".las", ".xyz"],
+            "1": [".xyz", ".shp"],
         }
 
-        # frames
+        # definition of frames
         self.extract_las_class_frame()
         self.merge_files_frame()
         self.create_files_frame()
@@ -31,18 +35,18 @@ class Gui():
 
 
     # definition of common basic_pattern (in/out paths, run button)
-    def create_basic_pattern(self, frame, file_extension, files_ext=''):
+    def create_basic_pattern(self, frame, input_ext, output_ext):
         input = Entry(frame, width=35, borderwidth=5)
         output = Entry(frame, width=35, borderwidth=5)
 
-        if files_ext in ['xyz files', 'shp files']:
-            self.input_path.set(f"Input directory ({files_ext})")
+        if input_ext in ["xyz files", "shp files"]:
+            self.input_path.set(f"Input directory ({input_ext})")
             input_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path("set_dir", input))
-            self.output_path.set(f"Results path ({file_extension})")
+            self.output_path.set(f"Results path ({output_ext})")
         else:
-            self.input_path.set(f"Input path ({file_extension})")
+            self.input_path.set(f"Input path ({input_ext})")
             input_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path("open", input))
-            self.output_path.set(f"Results path ({file_extension})")
+            self.output_path.set(f"Results path ({output_ext})")
 
 
         input.insert(0, self.input_path.get())
@@ -106,7 +110,7 @@ class Gui():
 
     def extract_las_class_frame(self):
         frame = LabelFrame(self.root, text="Extract LAS class:", padx=5, pady=5)
-        basic_pattern = self.create_basic_pattern(frame, ".las")
+        basic_pattern = self.create_basic_pattern(frame, ".las", ".las")
 
         # dropdown menu
         cassification_label = Label(frame, text="Select classification code:")
@@ -126,13 +130,13 @@ class Gui():
         basic_pattern["run_btn"].grid(row=4, column=0, columnspan=3, padx=10)
 
 
-    def create_radio_pattern(self, frame, ext_setter, basic_pattern, text1, text2):
+    def create_radio_pattern(self, frame, ext_setter, basic_pattern, extensions_dict, text1, text2):
         files_type = IntVar()
         files_type.set(0)
         first_btn = Radiobutton(frame, text=text1, variable=files_type, value=0,
-                              command=lambda: ext_setter(files_type.get(), basic_pattern))
+                              command=lambda: ext_setter(files_type.get(), basic_pattern, extensions_dict))
         second_btn = Radiobutton(frame, text=text2, variable=files_type, value=1,
-                              command=lambda: ext_setter(files_type.get(), basic_pattern))
+                              command=lambda: ext_setter(files_type.get(), basic_pattern, extensions_dict))
 
         return {
             text1: first_btn,
@@ -141,10 +145,14 @@ class Gui():
 
 
     # dynamic settings for entry inserts extensions
-    def setter(self, value, basic_pattern):
-        print(self.merged_files_types[str(value)])
-        self.input_path.set(f"Input directory ({self.merged_files_types[str(value)][0]})")
-        self.output_path.set(f"Results path ({self.merged_files_types[str(value)][1]})")
+    def setter(self, value, basic_pattern, extensions_dict):
+        if extensions_dict[str(value)][0] in ["xyz files", "shp files"]:
+            self.input_path.set(f"Input directory ({extensions_dict[str(value)][0]})")
+        else:
+            self.input_path.set(f"Input path ({extensions_dict[str(value)][0]})")
+
+
+        self.output_path.set(f"Results path ({extensions_dict[str(value)][1]})")
 
         basic_pattern["input"].delete(0, END)
         basic_pattern["output"].delete(0, END)
@@ -159,12 +167,12 @@ class Gui():
 
 
         frame = LabelFrame(self.root, text="Merge files:", padx=5, pady=5)
-        basic_pattern = self.create_basic_pattern(frame, self.merged_files_types['0'][0], self.merged_files_types['0'][1])
-        radio_pattern = self.create_radio_pattern(frame, self.setter, basic_pattern, ".xyz", ".shp")
+        basic_pattern = self.create_basic_pattern(frame, self.merged_files_types["0"][0], self.merged_files_types["0"][1])
+        radio_pattern = self.create_radio_pattern(frame, self.setter, basic_pattern, self.merged_files_types, ".xyz", ".shp")
 
         # grid positioning
         frame.grid(row=0, column=3, columnspan=3, padx=10, pady=10)
-        radio_pattern['.xyz'].grid(row=1, column=3, padx=10, sticky="e")
+        radio_pattern[".xyz"].grid(row=1, column=3, padx=10, sticky="e")
         radio_pattern[".shp"].grid(row=1, column=4, padx=10, sticky="w")
         basic_pattern["input"].grid(row=2, column=3, columnspan=2, padx=10, pady=10)
         basic_pattern["input_btn"].grid(row=2, column=5)
@@ -181,8 +189,8 @@ class Gui():
 
 
         frame = LabelFrame(self.root, text="Create files:", padx=5, pady=5)
-        basic_pattern = self.create_basic_pattern(frame, "")
-        radio_pattern = self.create_radio_pattern(frame, self.setter, basic_pattern, "XYZ from LAS", "SHP from XYZ")
+        basic_pattern = self.create_basic_pattern(frame, ".las", ".xyz")
+        radio_pattern = self.create_radio_pattern(frame, self.setter, basic_pattern, self.created_files_type, "XYZ from LAS", "SHP from XYZ")
 
         # grid positioning
         frame.grid(row=6, column=0, columnspan=3, padx=10, pady=10, sticky="w")
@@ -197,7 +205,7 @@ class Gui():
 
     def clip_xyz_to_poly_frame(self):
         frame = LabelFrame(self.root, text="Clip XYZ to POLYGON:", padx=5, pady=5)
-        basic_pattern = self.create_basic_pattern(frame, "")
+        basic_pattern = self.create_basic_pattern(frame, "", "")
         polygon_input = Entry(frame, width=35, borderwidth=5)
         polygon_input.insert(0, "Path to polygon shapefile")
         polygon_input_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path("open", input))
@@ -215,7 +223,7 @@ class Gui():
 
     def get_max_height_frame(self):
         frame = LabelFrame(self.root, text="Get max height:", padx=5, pady=5)
-        basic_pattern = self.create_basic_pattern(frame, "")
+        basic_pattern = self.create_basic_pattern(frame, "", "")
 
         #grid positioning
         frame.grid(row=11, column=0, columnspan=3, padx=10, pady=10, sticky="w")
