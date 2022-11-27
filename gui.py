@@ -1,6 +1,6 @@
 from tkinter import *
 from tkinter import filedialog
-from tkinter.filedialog import asksaveasfile
+from tkinter.filedialog import asksaveasfilename, askdirectory
 from classification_codes import CLASSIFICATION_CODES
 
 
@@ -18,28 +18,43 @@ class Gui():
 
 
     def get_path(self, action, entry):
-        file_name= ()
         extensions = (("las files", "*.las"), ("xyz files", "*.xyz"), ("shp files", "*.shp"), ("all files", "*.*"))
 
-        if action == "open":
-            file_name = filedialog.askopenfilename(title="Browse for file", filetypes=(extensions))
-        else:
-            file_name = asksaveasfile(mode="w", initialfile = 'Untitled.las', defaultextension=".las", filetypes=extensions)
+        action2function = {
+            "open": self.set_input_path,
+            "save": self.set_output_path,
+            "set_dir": self.set_output_dir,
+        }
 
-        print(file_name)
-        if file_name != () and action == "open":
+        path = action2function[action](extensions, entry)
+
+
+    def set_input_path(self, extensions, entry):
+        file_name = filedialog.askopenfilename(title="Browse for file", filetypes=(extensions))
+
+        if isinstance(file_name, str) and file_name != '':
             self.input_path.set(file_name)
             entry.delete(0, END)
             entry.insert(0, self.input_path.get())
-        elif file_name != () and action == "save":
-            self.output_path.set(file_name.name)
+
+
+    def set_output_path(self, extensions, entry):
+        file_name = asksaveasfilename(initialfile='Untitled.las', defaultextension=".las", filetypes=extensions)
+
+        if isinstance(file_name, str) and file_name != '':
+            self.output_path.set(file_name)
             entry.delete(0, END)
             entry.insert(0, self.output_path.get())
 
 
+    def set_output_dir(self, extensions, entry):
+        file_name = askdirectory()
 
-    def caller(self, entry_textm, cb):
-        print('call a function')
+        if isinstance(file_name, str) and file_name != '':
+            self.output_path.set(file_name)
+            entry.delete(0, END)
+            entry.insert(0, self.output_path.get())
+
 
     def extract_las_class(self):
         frame = LabelFrame(self.root, text="Extract LAS class:", padx=5, pady=5)
@@ -59,7 +74,7 @@ class Gui():
 
         input_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path("open", input))
         output_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path("save", output))
-        run_btn = Button(frame, text="RUN", padx=10, command=self.caller)
+        run_btn = Button(frame, text="RUN", padx=10, command=self.event_viewer)
 
         cassification_label.grid(row=0, column=0, padx=10, pady=10, sticky="w")
         dropdown.grid(row=0, column=1, columnspan=2, padx=10, pady=10, sticky="w")
@@ -93,6 +108,7 @@ class Gui():
         output_btn.grid(row=3, column=5)
         run_btn.grid(row=4, column=3, sticky="w", padx=10)
 
+        # radio buttons
         files_type = StringVar()
         files_type.set("xyz")
         xyz_btn = Radiobutton(frame, text=".xyz", variable=files_type, value="xyz",
