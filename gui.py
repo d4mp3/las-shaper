@@ -7,26 +7,41 @@ class Gui():
     def __init__(self):
         self.root = Tk()
         self.root.title("Las2Shp")
+        self.input_path = StringVar()
+        self.output_path = StringVar()
         self.extract_las_class()
         self.merge_files()
         quit_btn = Button(self.root, text="EXIT", command=self.root.quit)
         quit_btn.grid(row=3, column=2, sticky="w", padx=10)
 
 
-    def get_path(self):
+    def get_path(self, var, entry):
         extensions = (("las files", "*.las"), ("xyz files", "*.xyz"),("shp files", "*.las") ,("all files", "*.*"))
-        self.root = filedialog.askopenfile(title="Select a file", filetypes=(extensions))
+        file_name = filedialog.askopenfilename(title="Browse for file", filetypes=(extensions))
 
+        self.input_path.set(file_name) if var == "[Input path]" else self.output_path.set(file_name)
+
+        entry.delete(0, END)
+        entry.insert(0, self.input_path.get())
+
+
+    def caller(self, entry_textm, cb):
+        ...
 
     def extract_las_class(self):
 
         frame = LabelFrame(self.root, text="Extract LAS class:", padx=5, pady=5)
+
         input = Entry(frame, width=35, borderwidth=5)
-        input.insert(0, "[Input path]")
+        self.input_path.set("[Input path]")
+        input.insert(0, self.input_path.get())
+
         output = Entry(frame, width=35, borderwidth=5)
-        output.insert(0, "[Output directory]")
-        input_btn = Button(frame, text="...", padx=10, command=self.get_path)
-        output_btn = Button(frame, text="...", padx=10, command=self.get_path)
+        self.output_path.set("[Output path]")
+        output.insert(0, self.output_path.get())
+
+        input_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path(self.input_path.get(), input))
+        output_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path(self.output_path.get(), output))
         run_btn = Button(frame, text="RUN", padx=10, command=self.get_path)
 
         frame.grid(row=0, column=0, columnspan=3, padx=10, pady=10)
