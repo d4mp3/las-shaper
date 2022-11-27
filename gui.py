@@ -126,13 +126,13 @@ class Gui():
         basic_pattern["run_btn"].grid(row=4, column=0, columnspan=3, padx=10)
 
 
-    def create_radio_pattern(self, frame, ext_setter, text1, text2):
+    def create_radio_pattern(self, frame, ext_setter, basic_pattern, text1, text2):
         files_type = IntVar()
         files_type.set(0)
         first_btn = Radiobutton(frame, text=text1, variable=files_type, value=0,
-                              command=lambda: ext_setter(files_type.get()))
+                              command=lambda: ext_setter(files_type.get(), basic_pattern))
         second_btn = Radiobutton(frame, text=text2, variable=files_type, value=1,
-                              command=lambda: ext_setter(files_type.get()))
+                              command=lambda: ext_setter(files_type.get(), basic_pattern))
 
         return {
             text1: first_btn,
@@ -140,21 +140,27 @@ class Gui():
         }
 
 
+    # dynamic settings for entry inserts extensions
+    def setter(self, value, basic_pattern):
+        print(self.merged_files_types[str(value)])
+        self.input_path.set(f"Input directory ({self.merged_files_types[str(value)][0]})")
+        self.output_path.set(f"Results path ({self.merged_files_types[str(value)][1]})")
+
+        basic_pattern["input"].delete(0, END)
+        basic_pattern["output"].delete(0, END)
+        basic_pattern["input"].insert(0, self.input_path.get())
+        basic_pattern["output"].insert(0, self.output_path.get())
+
     def merge_files_frame(self):
 
         # function caller for radio buttons
         def caller(value):
             print(value)
 
-        def setter(value):
-            print(self.merged_files_types[str(value)])
-            return self.merged_files_types[str(value)]
-
 
         frame = LabelFrame(self.root, text="Merge files:", padx=5, pady=5)
-        print(self.merged_files_types['0'])
-        basic_pattern = self.create_basic_pattern(frame, self.merged_files_types['0'][0], 'xyz files')
-        radio_pattern = self.create_radio_pattern(frame, setter, ".xyz", ".shp")
+        basic_pattern = self.create_basic_pattern(frame, self.merged_files_types['0'][0], self.merged_files_types['0'][1])
+        radio_pattern = self.create_radio_pattern(frame, self.setter, basic_pattern, ".xyz", ".shp")
 
         # grid positioning
         frame.grid(row=0, column=3, columnspan=3, padx=10, pady=10)
@@ -176,7 +182,7 @@ class Gui():
 
         frame = LabelFrame(self.root, text="Create files:", padx=5, pady=5)
         basic_pattern = self.create_basic_pattern(frame, "")
-        radio_pattern = self.create_radio_pattern(frame, caller, "XYZ from LAS", "SHP from XYZ")
+        radio_pattern = self.create_radio_pattern(frame, self.setter, basic_pattern, "XYZ from LAS", "SHP from XYZ")
 
         # grid positioning
         frame.grid(row=6, column=0, columnspan=3, padx=10, pady=10, sticky="w")
@@ -218,13 +224,6 @@ class Gui():
         basic_pattern["output"].grid(row=13, column=0, columnspan=2, padx=10, pady=10)
         basic_pattern["output_btn"].grid(row=13, column=2)
         basic_pattern["run_btn"].grid(row=14, column=0, columnspan=3, padx=10)
-
-
-
-
-
-
-
 
 
 if __name__ == "__main__":
