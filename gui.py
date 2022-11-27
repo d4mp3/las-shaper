@@ -17,6 +17,28 @@ class Gui():
         quit_btn.grid(row=3, column=2, sticky="w", padx=10)
 
 
+    # definition of common pattern (in/out path, run button)
+    def create_basic_pattern(self, frame):
+        input = Entry(frame, width=35, borderwidth=5)
+        self.input_path.set("[Input path]")
+        input.insert(0, self.input_path.get())
+
+        output = Entry(frame, width=35, borderwidth=5)
+        self.output_path.set("[Output path]")
+        output.insert(0, self.output_path.get())
+
+        input_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path("open", input))
+        output_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path("save", output))
+        run_btn = Button(frame, text="RUN", padx=10, command=self.event_viewer)
+
+        return {
+                'input': input,
+                'output': output,
+                'input_btn': input_btn,
+                'output_btn': output_btn,
+                'run_btn': run_btn,
+                }
+
     def get_path(self, action, entry):
         extensions = (("las files", "*.las"), ("xyz files", "*.xyz"), ("shp files", "*.shp"), ("all files", "*.*"))
 
@@ -27,7 +49,6 @@ class Gui():
         }
 
         path = action2function[action](extensions, entry)
-
 
     def set_input_path(self, extensions, entry):
         file_name = filedialog.askopenfilename(title="Browse for file", filetypes=(extensions))
@@ -56,72 +77,61 @@ class Gui():
             entry.insert(0, self.output_path.get())
 
 
+    def event_viewer(self):
+        log_viewer = Toplevel()
+        log_viewer.title("Log Viewer")
+        label = Label(log_viewer).grid()
+
+
     def extract_las_class(self):
         frame = LabelFrame(self.root, text="Extract LAS class:", padx=5, pady=5)
+        pattern = self.create_basic_pattern(frame)
+
+        # dropdown menu
         cassification_label = Label(frame, text="Select classification code:")
         code = StringVar()
         code.set(CLASSIFICATION_CODES[0])
         dropdown = OptionMenu(frame, code, *CLASSIFICATION_CODES)
         dropdown.config(width=15)
 
-        input = Entry(frame, width=35, borderwidth=5)
-        self.input_path.set("[Input path]")
-        input.insert(0, self.input_path.get())
-
-        output = Entry(frame, width=35, borderwidth=5)
-        self.output_path.set("[Output path]")
-        output.insert(0, self.output_path.get())
-
-        input_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path("open", input))
-        output_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path("save", output))
-        run_btn = Button(frame, text="RUN", padx=10, command=self.event_viewer)
-
+        # grid positioning
         cassification_label.grid(row=0, column=0, padx=10, pady=10, sticky="w")
         dropdown.grid(row=0, column=1, columnspan=2, padx=10, pady=10, sticky="w")
-
         frame.grid(row=0, column=0, columnspan=3, padx=10, pady=10)
-        input.grid(row=2, column=0, columnspan=2, padx=10, pady=10)
-        input_btn.grid(row=2, column=2)
-        output.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
-        output_btn.grid(row=3, column=2)
-        run_btn.grid(row=4, column=0, sticky="w", padx=10)
+        pattern["input"].grid(row=2, column=0, columnspan=2, padx=10, pady=10)
+        pattern["input_btn"].grid(row=2, column=2)
+        pattern["output"].grid(row=3, column=0, columnspan=2, padx=10, pady=10)
+        pattern["output_btn"].grid(row=3, column=2)
+        pattern["run_btn"].grid(row=4, column=0, sticky="w", padx=10)
 
-    def event_viewer(self):
-        log_viewer = Toplevel()
-        log_viewer.title("Log Viewer")
-        label = Label(log_viewer).grid()
 
     def merge_files(self):
         frame = LabelFrame(self.root, text="Merge Files:", padx=5, pady=5)
-        input = Entry(frame, width=35, borderwidth=5)
-        input.insert(0, "[Input path]")
-        output = Entry(frame, width=35, borderwidth=5)
-        output.insert(0, "[Output directory]")
-        input_btn = Button(frame, text="...", padx=10, command=self.get_path)
-        output_btn = Button(frame, text="...", padx=10, command=self.get_path)
-        run_btn = Button(frame, text="RUN", padx=10, command=self.event_viewer)
+        pattern = self.create_basic_pattern(frame)
 
-        frame.grid(row=0, column=3, columnspan=3, padx=10, pady=10)
-        input.grid(row=2, column=3, columnspan=2, padx=10, pady=10)
-        input_btn.grid(row=2, column=5)
-        output.grid(row=3, column=3, columnspan=2, padx=10, pady=10)
-        output_btn.grid(row=3, column=5)
-        run_btn.grid(row=4, column=3, sticky="w", padx=10)
+
+        # function caller for radio buttons
+        def caller(value):
+            print(value)
+
 
         # radio buttons
         files_type = StringVar()
         files_type.set("xyz")
         xyz_btn = Radiobutton(frame, text=".xyz", variable=files_type, value="xyz",
-                              command=lambda: clicked(files_type.get()))
+                              command=lambda: caller(files_type.get()))
         shp_btn = Radiobutton(frame, text=".shp", variable=files_type, value="shp",
-                              command=lambda: clicked(files_type.get()))
+                              command=lambda: caller(files_type.get()))
         xyz_btn.grid(row=1, column=3, padx=10, sticky="e")
         shp_btn.grid(row=1, column=4, padx=10, sticky="w")
 
-        def clicked(value):
-            print(value)
-
-
+        # grid positioning
+        frame.grid(row=0, column=3, columnspan=3, padx=10, pady=10)
+        pattern["input"].grid(row=2, column=3, columnspan=2, padx=10, pady=10)
+        pattern["input_btn"].grid(row=2, column=5)
+        pattern["output"].grid(row=3, column=3, columnspan=2, padx=10, pady=10)
+        pattern["output_btn"].grid(row=3, column=5)
+        pattern["run_btn"].grid(row=4, column=3, sticky="w", padx=10)
 
 
     # def create_shp_from_xyz(self):
