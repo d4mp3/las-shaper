@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter import filedialog
+from classification_codes import CLASSIFICATION_CODES
 
 
 class Gui():
@@ -26,11 +27,15 @@ class Gui():
 
 
     def caller(self, entry_textm, cb):
-        ...
+        print('call a function')
 
     def extract_las_class(self):
-
         frame = LabelFrame(self.root, text="Extract LAS class:", padx=5, pady=5)
+        cassification_label = Label(frame, text="Select classification code:")
+        code = StringVar()
+        code.set(CLASSIFICATION_CODES[0])
+        dropdown = OptionMenu(frame, code, *CLASSIFICATION_CODES)
+        dropdown.config(width=15)
 
         input = Entry(frame, width=35, borderwidth=5)
         self.input_path.set("[Input path]")
@@ -42,14 +47,17 @@ class Gui():
 
         input_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path(self.input_path.get(), input))
         output_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path(self.output_path.get(), output))
-        run_btn = Button(frame, text="RUN", padx=10, command=self.get_path)
+        run_btn = Button(frame, text="RUN", padx=10, command=self.caller)
+
+        cassification_label.grid(row=0, column=0, padx=10, pady=10, sticky="w")
+        dropdown.grid(row=0, column=1, columnspan=2, padx=10, pady=10, sticky="w")
 
         frame.grid(row=0, column=0, columnspan=3, padx=10, pady=10)
-        input.grid(row=1, column=0, columnspan=2, padx=10, pady=10)
-        input_btn.grid(row=1, column=2)
-        output.grid(row=2, column=0, columnspan=2, padx=10, pady=10)
-        output_btn.grid(row=2, column=2)
-        run_btn.grid(row=3, column=0, sticky="w", padx=10)
+        input.grid(row=2, column=0, columnspan=2, padx=10, pady=10)
+        input_btn.grid(row=2, column=2)
+        output.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
+        output_btn.grid(row=3, column=2)
+        run_btn.grid(row=4, column=0, sticky="w", padx=10)
 
     def event_viewer(self):
         log_viewer = Toplevel()
