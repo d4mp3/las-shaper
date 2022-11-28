@@ -1,5 +1,5 @@
 from tkinter import *
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 from tkinter.filedialog import asksaveasfilename, askdirectory
 from classification_codes import CLASSIFICATION_CODES
 
@@ -29,6 +29,7 @@ class Gui():
         self.clip_xyz_to_poly_frame()
         self.get_max_height_frame()
         self.console_log_frame()
+        self.exit_button()
 
 
     # definition of common basic_pattern (in/out paths, run button)
@@ -130,7 +131,14 @@ class Gui():
 
 
     def exit_button(self):
-        quit_btn = Button(self.root, text="EXIT", width=5, command=self.root.quit)
+
+        def handle_quiting():
+            response = messagebox.askyesno('Quit program', "Are you sure?")
+
+            if  response == 1:
+                self.root.quit()
+
+        quit_btn = Button(self.root, text="EXIT", width=5, command=handle_quiting)
         quit_btn.grid(row=16, column=5, sticky="w", padx=10)
 
 
