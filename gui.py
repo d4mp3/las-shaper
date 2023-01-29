@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import filedialog, messagebox
 from tkinter.filedialog import asksaveasfilename, askdirectory
 from classification_codes import CLASSIFICATION_CODES
+from app import *
 
 
 class Gui():
@@ -33,28 +34,28 @@ class Gui():
 
 
     # definition of common basic_pattern (in/out paths, run button)
-    def create_basic_pattern(self, frame, input_ext, output_ext):
-        input = Entry(frame, width=35, borderwidth=5)
-        output = Entry(frame, width=35, borderwidth=5)
+    def create_basic_pattern(self, frame, input_ext, output_ext, run_command=0):
+        input_entry = Entry(frame, width=35, borderwidth=5)
+        output_entry = Entry(frame, width=35, borderwidth=5)
 
         if input_ext in ["xyz files", "shp files"]:
             self.input_path.set(f"Input directory ({input_ext})")
-            input_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path("set_dir", input))
+            input_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path("set_dir", input_entry))
             self.output_path.set(f"Results path ({output_ext})")
         else:
             self.input_path.set(f"Input path ({input_ext})")
-            input_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path("open", input))
+            input_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path("open", input_entry))
             self.output_path.set(f"Results path ({output_ext})")
 
 
-        input.insert(0, self.input_path.get())
-        output.insert(0, self.output_path.get())
-        output_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path("save", output, ext=output_ext))
-        run_btn = Button(frame, text="RUN", width=5, padx=10, command=self.event_viewer)
+        input_entry.insert(0, self.input_path.get())
+        output_entry.insert(0, self.output_path.get())
+        output_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path("save", output_entry, ext=output_ext))
+        run_btn = Button(frame, text="RUN", width=5, padx=10, command=run_command)
 
         return {
-                "input": input,
-                "output": output,
+                "input_entry": input_entry,
+                "output_entry": output_entry,
                 "input_btn": input_btn,
                 "output_btn": output_btn,
                 "run_btn": run_btn,
@@ -76,7 +77,7 @@ class Gui():
 
 
     # dynamic settings for entry inserts extensions
-    def setter(self, value, basic_pattern, extensions_dict):
+    def ext_setter(self, value, basic_pattern, extensions_dict):
         if extensions_dict[str(value)][0] in ["xyz files", "shp files"]:
             self.input_path.set(f"Input directory ({extensions_dict[str(value)][0]})")
         else:
@@ -84,10 +85,10 @@ class Gui():
 
         self.output_path.set(f"Results path ({extensions_dict[str(value)][1]})")
 
-        basic_pattern["input"].delete(0, END)
-        basic_pattern["output"].delete(0, END)
-        basic_pattern["input"].insert(0, self.input_path.get())
-        basic_pattern["output"].insert(0, self.output_path.get())
+        basic_pattern["input_entry"].delete(0, END)
+        basic_pattern["output_entry"].delete(0, END)
+        basic_pattern["input_entry"].insert(0, self.input_path.get())
+        basic_pattern["output_entry"].insert(0, self.output_path.get())
 
 
     def get_path(self, action, entry, **kwargs):
@@ -147,10 +148,13 @@ class Gui():
         log_viewer.title("Log Viewer")
         label = Label(log_viewer).grid()
 
+    def hello(self):
+        print(self.output_path.get())
+
 
     def extract_las_class_frame(self):
         frame = LabelFrame(self.root, text="Extract LAS class:", padx=5, pady=5)
-        basic_pattern = self.create_basic_pattern(frame, ".las", ".las")
+        basic_pattern = self.create_basic_pattern(frame, ".las", ".las", self.hello)
 
         # dropdown menu
         cassification_label = Label(frame, text="Select classification code:")
@@ -163,53 +167,53 @@ class Gui():
         frame.grid(row=0, column=0, columnspan=3, padx=10, pady=10)
         cassification_label.grid(row=1, column=0, padx=10, pady=10, sticky="w")
         dropdown.grid(row=1, column=1, columnspan=2, padx=10, pady=10, sticky="w")
-        basic_pattern["input"].grid(row=2, column=0, columnspan=2, padx=10, pady=10)
+        basic_pattern["input_entry"].grid(row=2, column=0, columnspan=2, padx=10, pady=10)
         basic_pattern["input_btn"].grid(row=2, column=2)
-        basic_pattern["output"].grid(row=3, column=0, columnspan=2, padx=10, pady=10)
+        basic_pattern["output_entry"].grid(row=3, column=0, columnspan=2, padx=10, pady=10)
         basic_pattern["output_btn"].grid(row=3, column=2)
         basic_pattern["run_btn"].grid(row=4, column=0, columnspan=3, padx=10)
 
 
     def merge_files_frame(self):
 
-        # function caller for radio buttons
-        def caller(value):
+        # function radio_btn_caller for radio buttons
+        def radio_btn_caller(value):
             print(value)
 
 
         frame = LabelFrame(self.root, text="Merge files:", padx=5, pady=5)
         basic_pattern = self.create_basic_pattern(frame, self.merged_files_types["0"][0], self.merged_files_types["0"][1])
-        radio_pattern = self.create_radio_pattern(frame, self.setter, basic_pattern, self.merged_files_types, ".xyz", ".shp")
+        radio_pattern = self.create_radio_pattern(frame, self.ext_setter, basic_pattern, self.merged_files_types, ".xyz", ".shp")
 
         # grid positioning
         frame.grid(row=0, column=3, columnspan=3, padx=10, pady=10)
         radio_pattern[".xyz"].grid(row=1, column=3, padx=10, sticky="e")
         radio_pattern[".shp"].grid(row=1, column=4, padx=10, sticky="w")
-        basic_pattern["input"].grid(row=2, column=3, columnspan=2, padx=10, pady=10)
+        basic_pattern["input_entry"].grid(row=2, column=3, columnspan=2, padx=10, pady=10)
         basic_pattern["input_btn"].grid(row=2, column=5)
-        basic_pattern["output"].grid(row=3, column=3, columnspan=2, padx=10, pady=10)
+        basic_pattern["output_entry"].grid(row=3, column=3, columnspan=2, padx=10, pady=10)
         basic_pattern["output_btn"].grid(row=3, column=5)
         basic_pattern["run_btn"].grid(row=4, columnspan=3, column=3)
 
 
     def create_files_frame(self):
 
-        # function caller for radio buttons
-        def caller(value):
+        # function radio_btn_caller for radio buttons
+        def radio_btn_caller(value):
             print(value)
 
 
         frame = LabelFrame(self.root, text="Create files:", padx=5, pady=5)
         basic_pattern = self.create_basic_pattern(frame, ".las", ".xyz")
-        radio_pattern = self.create_radio_pattern(frame, self.setter, basic_pattern, self.created_files_type, "XYZ from LAS", "SHP from XYZ")
+        radio_pattern = self.create_radio_pattern(frame, self.ext_setter, basic_pattern, self.created_files_type, "XYZ from LAS", "SHP from XYZ")
 
         # grid positioning
         frame.grid(row=5, column=0, columnspan=3, padx=10, pady=10, sticky="w")
         radio_pattern["XYZ from LAS"].grid(row=6, column=0, padx=10, sticky="e")
         radio_pattern["SHP from XYZ"].grid(row=6, column=1, padx=10, sticky="w")
-        basic_pattern["input"].grid(row=7, column=0, columnspan=2, padx=10, pady=10)
+        basic_pattern["input_entry"].grid(row=7, column=0, columnspan=2, padx=10, pady=10)
         basic_pattern["input_btn"].grid(row=7, column=2)
-        basic_pattern["output"].grid(row=8, column=0, columnspan=2, padx=10, pady=10)
+        basic_pattern["output_entry"].grid(row=8, column=0, columnspan=2, padx=10, pady=10)
         basic_pattern["output_btn"].grid(row=8, column=2)
         basic_pattern["run_btn"].grid(row=9, column=0, columnspan=3, padx=10)
 
@@ -219,15 +223,15 @@ class Gui():
         basic_pattern = self.create_basic_pattern(frame, ".xyz", ".shp")
         polygon_input = Entry(frame, width=35, borderwidth=5)
         polygon_input.insert(0, "Input polygon path (.shp)")
-        polygon_input_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path("open", input))
+        polygon_input_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path("open", polygon_input))
 
         # grid positioning
         frame.grid(row=5, column=3, columnspan=3, padx=10, pady=10, sticky="w")
-        basic_pattern["input"].grid(row=6, column=3, columnspan=2, padx=10, pady=10)
+        basic_pattern["input_entry"].grid(row=6, column=3, columnspan=2, padx=10, pady=10)
         basic_pattern["input_btn"].grid(row=6, column=5)
         polygon_input.grid(row=7, column=3, columnspan=2, padx=10, pady=10)
         polygon_input_btn.grid(row=7, column=5)
-        basic_pattern["output"].grid(row=8, column=3, columnspan=2, padx=10, pady=10)
+        basic_pattern["output_entry"].grid(row=8, column=3, columnspan=2, padx=10, pady=10)
         basic_pattern["output_btn"].grid(row=8, column=5)
         basic_pattern["run_btn"].grid(row=9, column=3, columnspan=3, padx=10)
 
@@ -249,9 +253,9 @@ class Gui():
         dem_btn.grid(row=11, column=2)
         dsm_input.grid(row=12, column=0, columnspan=2, padx=10, pady=10)
         dsm_btn.grid(row=12, column=2)
-        basic_pattern["input"].grid(row=13, column=0, columnspan=2, padx=10, pady=10)
+        basic_pattern["input_entry"].grid(row=13, column=0, columnspan=2, padx=10, pady=10)
         basic_pattern["input_btn"].grid(row=13, column=2)
-        basic_pattern["output"].grid(row=14, column=0, columnspan=2, padx=10, pady=10)
+        basic_pattern["output_entry"].grid(row=14, column=0, columnspan=2, padx=10, pady=10)
         basic_pattern["output_btn"].grid(row=14, column=2)
         basic_pattern["run_btn"].grid(row=15, column=0, columnspan=3, padx=10)
 

@@ -23,7 +23,7 @@ DEM_XYZ = './data/exports/dem.xyz'
 bud_file = './data/shp/buildings.shp'
 buildings = gpd.read_file(bud_file)
 
-def extract_las_class(inpath, outpath):
+def extract_las_class(inpath, outpath, las_calssification):
     print("Calling extract_las_classification")
     pathlist = list(Path(inpath).glob('**/*.las'))
     out = outpath + '/las' + '/las_result.las'
@@ -40,7 +40,7 @@ def extract_las_class(inpath, outpath):
             new_file = laspy.create(
                 point_format=input_las.header.point_format, 
                 file_version=input_las.header.version)
-            new_file.points = input_las.points[input_las.classification == 6]
+            new_file.points = input_las.points[input_las.classification == las_calssification]
             print("Saving results to file...")
             new_file.write(out)
         else:
