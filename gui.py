@@ -159,8 +159,9 @@ class Gui():
         # dropdown menu
         cassification_label = Label(frame, text="Select classification code:")
         code = StringVar()
-        code.set(CLASSIFICATION_CODES[0])
-        dropdown = OptionMenu(frame, code, *CLASSIFICATION_CODES)
+        codes = list(map(lambda x: str(x[0]) + ' ' + str(x[1]), CLASSIFICATION_CODES))
+        code.set(codes[0])
+        dropdown = OptionMenu(frame, code, *codes)
         dropdown.config(width=15)
 
         # grid positioning
