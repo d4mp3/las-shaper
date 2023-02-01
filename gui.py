@@ -24,7 +24,7 @@ class Gui():
         }
 
         # definition of frames
-        self.extract_las_class_frame()
+        # self.extract_las_class_frame()
         self.merge_files_frame()
         self.create_files_frame()
         self.clip_xyz_to_poly_frame()
@@ -33,8 +33,8 @@ class Gui():
         self.exit_button()
 
 
-    # definition of common basic_pattern (in/out paths, run button)
-    def create_basic_pattern(self, frame, input_ext, output_ext, run_command=0):
+    # definition of common basic_pattern (in/out paths)
+    def create_basic_pattern(self, frame, input_ext, output_ext):
         input_entry = Entry(frame, width=35, borderwidth=5)
         output_entry = Entry(frame, width=35, borderwidth=5)
 
@@ -51,14 +51,12 @@ class Gui():
         input_entry.insert(0, self.input_path.get())
         output_entry.insert(0, self.output_path.get())
         output_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path("save", output_entry, ext=output_ext))
-        run_btn = Button(frame, text="RUN", width=5, padx=10, command=run_command)
 
         return {
                 "input_entry": input_entry,
                 "output_entry": output_entry,
                 "input_btn": input_btn,
                 "output_btn": output_btn,
-                "run_btn": run_btn,
                 }
 
 
@@ -148,21 +146,22 @@ class Gui():
         log_viewer.title("Log Viewer")
         label = Label(log_viewer).grid()
 
-    def hello(self):
-        print(self.output_path.get())
 
-
-    def extract_las_class_frame(self):
+    def extract_las_class_frame(self, extract_las_class):
         frame = LabelFrame(self.root, text="Extract LAS class:", padx=5, pady=5)
-        basic_pattern = self.create_basic_pattern(frame, ".las", ".las", self.hello)
+        basic_pattern = self.create_basic_pattern(frame, ".las", ".las")
 
         # dropdown menu
         cassification_label = Label(frame, text="Select classification code:")
-        code = StringVar()
-        codes = list(map(lambda x: str(x[0]) + ' ' + str(x[1]), CLASSIFICATION_CODES))
-        code.set(codes[0])
-        dropdown = OptionMenu(frame, code, *codes)
+        option = StringVar()
+        options = list(map(lambda x: str(x[0]) + ' ' + str(x[1]), CLASSIFICATION_CODES))
+        option.set(options[0])
+        dropdown = OptionMenu(frame, option, *options)
         dropdown.config(width=15)
+
+        # run button
+        run_btn = Button(frame, text="RUN", width=5, padx=10,
+                         command=lambda: extract_las_class(self.input_path.get(), self.output_path.get(), option.get()))
 
         # grid positioning
         frame.grid(row=0, column=0, columnspan=3, padx=10, pady=10)
@@ -172,7 +171,7 @@ class Gui():
         basic_pattern["input_btn"].grid(row=2, column=2)
         basic_pattern["output_entry"].grid(row=3, column=0, columnspan=2, padx=10, pady=10)
         basic_pattern["output_btn"].grid(row=3, column=2)
-        basic_pattern["run_btn"].grid(row=4, column=0, columnspan=3, padx=10)
+        run_btn.grid(row=4, column=0, columnspan=3, padx=10)
 
 
     def merge_files_frame(self):
@@ -194,7 +193,7 @@ class Gui():
         basic_pattern["input_btn"].grid(row=2, column=5)
         basic_pattern["output_entry"].grid(row=3, column=3, columnspan=2, padx=10, pady=10)
         basic_pattern["output_btn"].grid(row=3, column=5)
-        basic_pattern["run_btn"].grid(row=4, columnspan=3, column=3)
+        # basic_pattern["run_btn"].grid(row=4, columnspan=3, column=3)
 
 
     def create_files_frame(self):
@@ -216,7 +215,7 @@ class Gui():
         basic_pattern["input_btn"].grid(row=7, column=2)
         basic_pattern["output_entry"].grid(row=8, column=0, columnspan=2, padx=10, pady=10)
         basic_pattern["output_btn"].grid(row=8, column=2)
-        basic_pattern["run_btn"].grid(row=9, column=0, columnspan=3, padx=10)
+        # basic_pattern["run_btn"].grid(row=9, column=0, columnspan=3, padx=10)
 
 
     def clip_xyz_to_poly_frame(self):
@@ -234,7 +233,7 @@ class Gui():
         polygon_input_btn.grid(row=7, column=5)
         basic_pattern["output_entry"].grid(row=8, column=3, columnspan=2, padx=10, pady=10)
         basic_pattern["output_btn"].grid(row=8, column=5)
-        basic_pattern["run_btn"].grid(row=9, column=3, columnspan=3, padx=10)
+        # basic_pattern["run_btn"].grid(row=9, column=3, columnspan=3, padx=10)
 
 
     def get_max_height_frame(self):
@@ -258,15 +257,9 @@ class Gui():
         basic_pattern["input_btn"].grid(row=13, column=2)
         basic_pattern["output_entry"].grid(row=14, column=0, columnspan=2, padx=10, pady=10)
         basic_pattern["output_btn"].grid(row=14, column=2)
-        basic_pattern["run_btn"].grid(row=15, column=0, columnspan=3, padx=10)
+        # basic_pattern["run_btn"].grid(row=15, column=0, columnspan=3, padx=10)
 
 
     def console_log_frame(self):
         frame = LabelFrame(self.root, text="Console log:", padx=5, pady=5)
         frame.grid(row=10, column=3, columnspan=3, rowspan=5, padx=10, pady=10, sticky="w")
-
-
-
-if __name__ == "__main__":
-    gui = Gui()
-    gui.root.mainloop()
