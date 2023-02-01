@@ -36,7 +36,9 @@ class App():
         pathlist = []
         pathlist.append(inpath)
 
-        las_calssification = las_calssification.split(" ", 1)[0]
+        las_calssification = int(las_calssification.split(" ", 1)[0])
+
+        print(inpath, outpath, las_calssification)
 
         # if Path(outpath).exists() is False:
         #     os.mkdir(outpath + '/las')
@@ -53,6 +55,7 @@ class App():
                 new_file.points = input_las.points[input_las.classification == las_calssification]
                 print("Saving results to file...")
                 new_file.write(outpath)
+
             else:
                 input_las = laspy.read(path)
                 with laspy.open(outpath, mode="a") as ground_las:
@@ -62,8 +65,7 @@ class App():
                         print("Saving results to file...")
                         ground_las.append_points(
                             input_las.points[input_las.classification == las_calssification])
-
-        return outpath
+        return None
 
 
     def create_shp_from_xyz(self, xyz_file, outpath):
