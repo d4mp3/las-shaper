@@ -16,29 +16,20 @@ from pathlib import Path
 from numpy import savetxt
 import os
 
-OUTPATH = './data/exports'
-IN_LAS = './data/las'
-IN_XYZ = './data/xyz'
-DEM_XYZ = './data/exports/dem.xyz'
-bud_file = './data/shp/buildings.shp'
-buildings = gpd.read_file(bud_file)
+# OUTPATH = './data/exports'
+# IN_LAS = './data/las'
+# IN_XYZ = './data/xyz'
+# DEM_XYZ = './data/exports/dem.xyz'
+# bud_file = './data/shp/buildings.shp'
+# buildings = gpd.read_file(bud_file)
+
 
 class App():
-    def hello(self, inpath, outpath, classification):
-        # print(self.output_path.get())
-        print("inpath:", inpath, " outpath", outpath, " class", classification)
-        # code.set(option.get().split(" ", 1))
-
 
     def extract_las_class(self, inpath, outpath, las_calssification):
         print("Calling extract_las_classification")
-        # pathlist = list(Path(inpath).glob('**/*.las'))
-        pathlist = []
-        pathlist.append(inpath)
-
+        pathlist = [x.strip() for x in inpath.split(", ")]
         las_calssification = int(las_calssification.split(" ", 1)[0])
-
-        print(inpath, outpath, las_calssification)
 
         # if Path(outpath).exists() is False:
         #     os.mkdir(outpath + '/las')

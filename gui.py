@@ -102,10 +102,11 @@ class Gui():
 
 
     def set_input_path(self, entry, *args, **kwargs):
-        file_name = filedialog.askopenfilename(title="Browse for file", filetypes=(args))
+        file_name = filedialog.askopenfilenames(title="Browse for file", filetypes=(args))
+        file_names = ', '.join(file_name)
 
-        if isinstance(file_name, str) and file_name != "":
-            self.input_path.set(file_name)
+        if isinstance(file_names, str) and file_names != "":
+            self.input_path.set(file_names)
             entry.delete(0, END)
             entry.insert(0, self.input_path.get())
 
