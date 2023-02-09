@@ -14,6 +14,26 @@ class Gui():
         # definition of common variables
         self.input_path = StringVar()
         self.output_path = StringVar()
+
+        self.input_path_las_extract = StringVar()
+        self.output_path_las_extract = StringVar()
+        self.input_path_merge_files = StringVar()
+        self.output_path_merge_files = StringVar()
+        self.input_path_create_files = StringVar()
+        self.output_path_create_files = StringVar()
+        self.input_path_clip_xyz = StringVar()
+        self.output_path_clip_xyz = StringVar()
+        self.input_path_get_height = StringVar()
+        self.output_path_get_height = StringVar()
+
+        self.paths = {
+            "0": [self.input_path_las_extract, self.output_path_las_extract],
+            "1": [self.input_path_merge_files, self.output_path_merge_files],
+            "2": [self.input_path_create_files, self.output_path_create_files],
+            "3": [self.input_path_clip_xyz, self.output_path_clip_xyz],
+            "4": [self.input_path_get_height, self.output_path_get_height]
+        }
+
         self.merged_files_types = {
             "0": ["xyz files", ".xyz"],
             "1": ["shp files", ".shp"],
@@ -34,23 +54,27 @@ class Gui():
 
 
     # definition of common basic_pattern (in/out paths)
-    def create_basic_pattern(self, frame, input_ext, output_ext):
+    def create_basic_pattern(self, frame, input_ext, output_ext, frame_type):
         input_entry = Entry(frame, width=35, borderwidth=5)
         output_entry = Entry(frame, width=35, borderwidth=5)
 
+        input_path = self.paths[frame_type][0]
+        output_path = self.paths[frame_type][1]
+
+
         if input_ext in ["xyz files", "shp files"]:
-            self.input_path.set(f"Input directory ({input_ext})")
-            input_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path("set_dir", input_entry))
-            self.output_path.set(f"Results path ({output_ext})")
+            input_path.set(f"Input directory ({input_ext})")
+            input_btn = Button(frame, text="...", padx=10, command=lambda: self.manage_path("set_dir", input_entry, frame_type))
+            output_path.set(f"Results path ({output_ext})")
         else:
-            self.input_path.set(f"Input path ({input_ext})")
-            input_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path("open", input_entry))
-            self.output_path.set(f"Results path ({output_ext})")
+            input_path.set(f"Input path ({input_ext})")
+            input_btn = Button(frame, text="...", padx=10, command=lambda: self.manage_path("open", input_entry, frame_type))
+            output_path.set(f"Results path ({output_ext})")
 
 
-        input_entry.insert(0, self.input_path.get())
-        output_entry.insert(0, self.output_path.get())
-        output_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path("save", output_entry, ext=output_ext))
+        input_entry.insert(0, input_path.get())
+        output_entry.insert(0, output_path.get())
+        output_btn = Button(frame, text="...", padx=10, command=lambda: self.manage_path("save", output_entry, frame_type, ext=output_ext))
 
         return {
                 "input_entry": input_entry,
@@ -60,17 +84,17 @@ class Gui():
                 }
 
 
-    def create_radio_pattern(self, frame, ext_setter, basic_pattern, extensions_dict, text1, text2):
+    def create_radio_pattern(self, frame, ext_setter, basic_pattern, extensions_dict, option1, option2):
         files_type = IntVar()
         files_type.set(0)
-        first_btn = Radiobutton(frame, text=text1, variable=files_type, value=0,
+        first_btn = Radiobutton(frame, text=option1, variable=files_type, value=0,
                                 command=lambda: ext_setter(files_type.get(), basic_pattern, extensions_dict))
-        second_btn = Radiobutton(frame, text=text2, variable=files_type, value=1,
+        second_btn = Radiobutton(frame, text=option2, variable=files_type, value=1,
                                  command=lambda: ext_setter(files_type.get(), basic_pattern, extensions_dict))
 
         return {
-            text1: first_btn,
-            text2: second_btn,
+            option1: first_btn,
+            option2: second_btn,
         }
 
 
@@ -89,7 +113,7 @@ class Gui():
         basic_pattern["output_entry"].insert(0, self.output_path.get())
 
 
-    def get_path(self, action, entry, **kwargs):
+    def manage_path(self, action, entry, frame_type, **kwargs):
         extensions = (("las files", "*.las"), ("xyz files", "*.xyz"), ("shp files", "*.shp"), ("all files", "*.*"))
 
         action2function = {
@@ -98,36 +122,36 @@ class Gui():
             "set_dir": self.set_output_dir,
         }
 
-        path = action2function[action](entry, *extensions, **kwargs)
+        path = action2function[action](entry, frame_type, *extensions, **kwargs)
 
 
-    def set_input_path(self, entry, *args, **kwargs):
+    def set_input_path(self, entry, frame_type, *args, **kwargs):
         file_name = filedialog.askopenfilenames(title="Browse for file", filetypes=(args))
         file_names = ', '.join(file_name)
 
         if isinstance(file_names, str) and file_names != "":
-            self.input_path.set(file_names)
+            self.paths[frame_type][0].set(file_names)
             entry.delete(0, END)
-            entry.insert(0, self.input_path.get())
+            entry.insert(0, self.paths[frame_type][0].get())
 
 
-    def set_output_path(self, entry, *args, **kwargs):
+    def set_output_path(self, entry, frame_type, *args, **kwargs):
         ext = (kwargs['ext'])
         file_name = asksaveasfilename(initialfile=f"Untitled{ext}", filetypes=args)
 
         if isinstance(file_name, str) and file_name != "":
-            self.output_path.set(file_name)
+            self.paths[frame_type][1].set(file_name)
             entry.delete(0, END)
-            entry.insert(0, self.output_path.get())
+            entry.insert(0, self.paths[frame_type][1].get())
 
 
-    def set_output_dir(self, extensions, entry, *args, **kwargs):
+    def set_output_dir(self, extensions, entry, frame_type, *args, **kwargs):
         file_name = askdirectory()
 
         if isinstance(file_name, str) and file_name != "":
-            self.output_path.set(file_name)
+            self.paths[frame_type][1].set(file_name)
             entry.delete(0, END)
-            entry.insert(0, self.output_path.get())
+            entry.insert(0, self.paths[frame_type][0].get())
 
 
     def exit_button(self):
@@ -150,7 +174,7 @@ class Gui():
 
     def extract_las_class_frame(self, extract_las_class):
         frame = LabelFrame(self.root, text="Extract LAS class:", padx=5, pady=5)
-        basic_pattern = self.create_basic_pattern(frame, ".las", ".las")
+        basic_pattern = self.create_basic_pattern(frame, ".las", ".las", "0")
 
         # dropdown menu
         cassification_label = Label(frame, text="Select classification code:")
@@ -162,7 +186,7 @@ class Gui():
 
         # run button
         run_btn = Button(frame, text="RUN", width=5, padx=10,
-                         command=lambda: extract_las_class(self.input_path.get(), self.output_path.get(), option.get()))
+                         command=lambda: extract_las_class(self.paths["0"][0].get(), self.paths["0"][1].get(), option.get()))
 
         # grid positioning
         frame.grid(row=0, column=0, columnspan=3, padx=10, pady=10)
@@ -183,7 +207,7 @@ class Gui():
 
 
         frame = LabelFrame(self.root, text="Merge files:", padx=5, pady=5)
-        basic_pattern = self.create_basic_pattern(frame, self.merged_files_types["0"][0], self.merged_files_types["0"][1])
+        basic_pattern = self.create_basic_pattern(frame, self.merged_files_types["0"][0], self.merged_files_types["0"][1], "1")
         radio_pattern = self.create_radio_pattern(frame, self.ext_setter, basic_pattern, self.merged_files_types, ".xyz", ".shp")
 
         # grid positioning
@@ -205,7 +229,7 @@ class Gui():
 
 
         frame = LabelFrame(self.root, text="Create files:", padx=5, pady=5)
-        basic_pattern = self.create_basic_pattern(frame, ".las", ".xyz")
+        basic_pattern = self.create_basic_pattern(frame, ".las", ".xyz", "2")
         radio_pattern = self.create_radio_pattern(frame, self.ext_setter, basic_pattern, self.created_files_type, "XYZ from LAS", "SHP from XYZ")
 
         # grid positioning
@@ -221,10 +245,10 @@ class Gui():
 
     def clip_xyz_to_poly_frame(self):
         frame = LabelFrame(self.root, text="Clip XYZ to POLYGON:", padx=5, pady=5)
-        basic_pattern = self.create_basic_pattern(frame, ".xyz", ".shp")
+        basic_pattern = self.create_basic_pattern(frame, ".xyz", ".shp", "3")
         polygon_input = Entry(frame, width=35, borderwidth=5)
         polygon_input.insert(0, "Input polygon path (.shp)")
-        polygon_input_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path("open", polygon_input))
+        polygon_input_btn = Button(frame, text="...", padx=10, command=lambda: self.manage_path("open", polygon_input, "3"))
 
         # grid positioning
         frame.grid(row=5, column=3, columnspan=3, padx=10, pady=10, sticky="w")
@@ -239,11 +263,11 @@ class Gui():
 
     def get_max_height_frame(self):
         frame = LabelFrame(self.root, text="Get max height from the features in shapefile:", padx=5, pady=5)
-        basic_pattern = self.create_basic_pattern(frame, ".shp", ".shp")
+        basic_pattern = self.create_basic_pattern(frame, ".shp", ".shp", "4")
         dem_input = Entry(frame, width=35, borderwidth=5)
         dsm_input = Entry(frame, width=35, borderwidth=5)
-        dem_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path("open", dem_input,))
-        dsm_btn = Button(frame, text="...", padx=10, command=lambda: self.get_path("open", dsm_input))
+        dem_btn = Button(frame, text="...", padx=10, command=lambda: self.manage_path("open", dem_input, "4"))
+        dsm_btn = Button(frame, text="...", padx=10, command=lambda: self.manage_path("open", dsm_input, "4"))
         dem_input.insert(0, "DEM input (.las)")
         dsm_input.insert(0, "DSM input (.las)")
 
