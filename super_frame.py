@@ -10,15 +10,6 @@ class SuperFrame():
         self.input_path = StringVar()
         self.output_path = StringVar()
 
-        self.merged_files_types = {
-            "0": ["xyz files", ".xyz"],
-            "1": ["shp files", ".shp"],
-        }
-        self.created_files_type = {
-            "0": [".las", ".xyz"],
-            "1": [".xyz", ".shp"],
-        }
-
 
     def create_basic_pattern(self, frame, input_ext, output_ext, input_path, output_path):
         """
