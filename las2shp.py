@@ -14,7 +14,7 @@ import os
 def extract_las_class(inpath, outpath, las_calssification):
     print(inpath, outpath, las_calssification)
     print("Calling extract_las_classification")
-    pathlist = [x.strip() for x in inpath.split(", ")]
+    pathlist = [x.strip() for x in inpath.split("; ")]
     las_calssification = int(las_calssification.split(" ", 1)[0])
 
     # if Path(outpath).exists() is False:
@@ -42,7 +42,7 @@ def extract_las_class(inpath, outpath, las_calssification):
                     print("Saving results to file...")
                     ground_las.append_points(
                         input_las.points[input_las.classification == las_calssification])
-        print("Saved")
+        print("Results have been saved!")
     return None
 
 
@@ -80,7 +80,9 @@ def create_xyz_from_las(las, outpath):
 
 def merge_shp_files(inpath, outpath):
         print("Calling merge_shp_files")
-        pathlist = list(Path(inpath).glob('**/*.shp'))
+        # pathlist = list(Path(inpath).glob('**/*.shp'))
+        pathlist = [x.strip() for x in inpath.split("; ")]
+
 
         for counter, path in enumerate(pathlist):
             if counter == 0:
@@ -97,18 +99,23 @@ def merge_shp_files(inpath, outpath):
 
         results = gpd.pd.concat([gdfs])
         print("Saving results to file...")
-        if Path(outpath + '/shp').exists() is False:
-            os.mkdir(outpath + '/shp')
-            results.to_file(outpath + '/shp/dem_results.shp', mode='w')
-        else:
-            results.to_file(outpath + '/shp/dem_results.shp', mode='w')
+        results.to_file(outpath, mode='w')
+
+        # if Path(outpath + '/shp').exists() is False:
+        #     os.mkdir(outpath + '/shp')
+        #     results.to_file(outpath + '/shp/dem_results.shp', mode='w')
+        # else:
+        #     results.to_file(outpath + '/shp/dem_results.shp', mode='w')
+
+        print("Results have been saved!")
 
 
 def merge_xyz_files(inpath, outpath):
         print("Calling merge_xyz_files")
-        pathlist = Path(inpath).glob('**/*.xyz')
-        new_file = open(outpath + '/xyz/dem.xyz', 'a')
+        pathlist = [x.strip() for x in inpath.split("; ")]
+        new_file = open(outpath, 'a')
 
+        print("Working on merge process...")
         for path in pathlist:
             xyz_file = open(path, 'r')
 
@@ -117,6 +124,7 @@ def merge_xyz_files(inpath, outpath):
 
         xyz_file.close()
         new_file.close()
+        print("Results have been saved!")
 
 
 def dem_handler(inpath, outpath, poly):

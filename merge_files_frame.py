@@ -1,34 +1,111 @@
-from super_frame import *
+from tkinter import ttk, StringVar, IntVar, END
+from tkinter.filedialog import asksaveasfilename, askopenfilenames
+from classification_codes import CLASSIFICATION_CODES
+from las2shp import merge_shp_files, merge_xyz_files
 
+class MergeFilesFrame(ttk.LabelFrame):
+    def __init__(self, container):
+        super().__init__(container, text='MERGE FILES')
 
-class MergeFilesFrame(SuperFrame):
-
-    def __init__(self, main_window):
-        self.input_path = StringVar()
-        self.output_path = StringVar()
-        self.root = main_window.root
-
+        # vars for radio button handling and dynamic change of entries extensions
+        self.radio_option = IntVar(value=0)
         self.filetypes = {
             0: ["xyz files", ".xyz"],
             1: ["shp files", ".shp"],
         }
 
-    def create_frame(self):
-        frame = LabelFrame(self.root, text="Merge files:", padx=5, pady=5)
-        basic_pattern = self.create_basic_pattern(frame, self.filetypes[0][0], self.filetypes[0][1],
-                                                  self.input_path, self.output_path,)
-        radio_pattern = self.create_radio_pattern(frame, basic_pattern, self.filetypes, ".xyz", ".shp")
+        # input/output paths vars
+        self.input_path = StringVar(value=f"Input directory ({str(self.filetypes[0][0])})")
+        self.output_path = StringVar(value=f"Results path ({str(self.filetypes[0][1])})")
+        # self.input_path.set(f"Input directory ({str(self.radio_option.get())})")
+        # self.output_path.set("Results path (.las)")
 
-        # run button
-        # run_btn = Button(frame, text="RUN", width=5, padx=10,
-        #                  command=lambda: extract_las_class(self.input_path.get(), self.output_path.get(), option.get()))
+        # #setup the grid layout manager
+        # self.columnconfigure(0, weight=3)
+        # self.columnconfigure(0, weight=1)
+        # self.columnconfigure(0, weight=3)
+        self.__create_widgets()
 
-        # grid positioning
-        frame.grid(row=0, column=3, columnspan=3, padx=10, pady=10)
-        radio_pattern[".xyz"].grid(row=1, column=3, padx=10, sticky="e")
-        radio_pattern[".shp"].grid(row=1, column=4, padx=10, sticky="w")
-        basic_pattern["input_entry"].grid(row=2, column=3, columnspan=2, padx=10, pady=10)
-        basic_pattern["input_btn"].grid(row=2, column=5)
-        basic_pattern["output_entry"].grid(row=3, column=3, columnspan=2, padx=10, pady=10)
-        basic_pattern["output_btn"].grid(row=3, column=5)
-        # basic_pattern["run_btn"].grid(row=4, columnspan=3, column=3)
+
+    def __create_widgets(self):
+        #radio buttons
+        self.first_option = ttk.Radiobutton(self, text=".xyz", variable=self.radio_option, value=0, command=lambda: self.__extension_handler())
+        self.first_option.grid(column=0, row=0, sticky='E', ipadx=5)
+        self.second_option = ttk.Radiobutton(self, text=".shp", variable=self.radio_option, value=1, command=lambda: self.__extension_handler())
+        self.second_option.grid(column=1, row=0, sticky='W', ipadx=5)
+
+        #input entry
+        self.input_entry = ttk.Entry(self)
+        self.input_entry.grid(column=0, columnspan=2, row=1)
+        self.input_entry.config(width=45)
+        self.input_entry.insert(0, self.input_path.get())
+        self.input_btn = ttk.Button(self, text="...", command=lambda: self.__get_input_path())
+        self.input_btn.grid(column=2, row=1, sticky="W")
+        self.input_btn.config(width=3)
+
+        #output entry
+        self.output_entry = ttk.Entry(self)
+        self.output_entry.grid(column=0, columnspan=2, row=2)
+        self.output_entry.config(width=45)
+        self.output_entry.insert(0, self.output_path.get())
+        self.output_btn = ttk.Button(self, text="...", command=lambda: self.__set_output_path())
+        self.output_btn.grid(column=2, row=2, sticky="W")
+        self.output_btn.config(width=3)
+
+        #run btn
+        self.run_btn = ttk.Button(self, text="RUN", command=lambda: self.__run())
+        self.run_btn.grid(column=0, columnspan=3, row=3)
+
+
+        for widget in self.winfo_children():
+            widget.grid(padx=0, pady=3)
+
+
+    def __get_input_path(self):
+        tuple_inputpaths = askopenfilenames(title="Browse for file", filetypes=[("xyz files", "*.xyz"), ("shapefiles", "*.shp")])
+        inputpaths = '; '.join(tuple_inputpaths)
+        self.input_path.set(inputpaths)
+        self.input_entry.delete(0, END)
+        self.input_entry.insert(0, self.input_path.get())
+
+
+    def __set_output_path(self):
+        outputpath = asksaveasfilename(initialfile=f"Untitled.las", filetypes=[("xyz files", "*.xyz"), ("shapefiles", "*.shp")])
+        self.output_path.set(outputpath)
+        self.output_entry.delete(0, END)
+        self.output_entry.insert(0, self.output_path.get())
+
+
+    def __extension_handler(self):
+        if int(self.radio_option.get()) == 0:
+            self.input_path.set(f"Input directory ({str(self.filetypes[0][0])})")
+            self.input_entry.delete(0, END)
+            self.input_entry.insert(0, self.input_path.get())
+
+            self.output_path.set(f"Results path ({str(self.filetypes[0][1])})")
+            self.output_entry.delete(0, END)
+            self.output_entry.insert(0, self.output_path.get())
+
+        elif int(self.radio_option.get()) == 1:
+            self.input_path.set(f"Input directory ({str(self.filetypes[1][0])})")
+            self.input_entry.delete(0, END)
+            self.input_entry.insert(0, self.input_path.get())
+
+            self.output_path.set(f"Results path ({str(self.filetypes[1][1])})")
+            self.output_entry.delete(0, END)
+            self.output_entry.insert(0, self.output_path.get())
+
+        else:
+            print('Invalid radio option!')
+
+
+    def __run(self):
+        if self.input_entry.get() != '' and self.output_entry != '':
+            if int(self.radio_option.get()) == 0:
+                merge_xyz_files(self.input_entry.get(), self.output_entry.get())
+            elif int(self.radio_option.get()) == 1:
+                merge_shp_files(self.input_entry.get(), self.output_entry.get())
+            else:
+                print('Invalid radio option!')
+        else:
+            print('invalid input or output path!')
