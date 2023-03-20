@@ -1,13 +1,6 @@
 '''
     TODO:
-
         - crs as functions' argument for define your own crs
-        - accessing of more attributes for spatial_join function
-        - create App class
-        - create common load_files_path function
-        - create common save_files function
-        - try to ommit converting las file to xyz for dem_handler purposes
-
 '''
 
 import geopandas as gpd
@@ -49,6 +42,7 @@ def extract_las_class(inpath, outpath, las_calssification):
                     print("Saving results to file...")
                     ground_las.append_points(
                         input_las.points[input_las.classification == las_calssification])
+        print("Saved")
     return None
 
 
