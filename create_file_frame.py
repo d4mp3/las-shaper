@@ -1,22 +1,18 @@
 from tkinter import ttk, StringVar, IntVar, END
-from tkinter.filedialog import asksaveasfilename, askopenfilenames
+from tkinter.filedialog import asksaveasfilename, askopenfilename
 from las2shp import create_xyz_from_las, create_shp_from_xyz
 
 
-class CreateFilesFrame(ttk.LabelFrame):
+class CreateFileFrame(ttk.LabelFrame):
     def __init__(self, container):
         super().__init__(container, text='CREATE FILES')
 
         # vars for radio button handling and dynamic change of entries extensions
         self.radio_option = IntVar(value=0)
-        self.filetypes = {
-            0: [".las", ".xyz"],
-            1: [".xyz", ".shp"],
-        }
 
         # input/output paths vars
-        self.input_path = StringVar(value=f"Input path ({str(self.filetypes[0][0])})")
-        self.output_path = StringVar(value=f"Results path ({str(self.filetypes[0][1])})")
+        self.input_path = StringVar(value=f"Input path (.las)")
+        self.output_path = StringVar(value=f"Results path (.xyz)")
 
         self.__create_widgets()
 
@@ -56,15 +52,22 @@ class CreateFilesFrame(ttk.LabelFrame):
 
 
     def __get_input_path(self):
-        tuple_inputpaths = askopenfilenames(title="Browse for files", filetypes=[("xyz files", "*.xyz"), ("las files", "*.las")])
-        inputpaths = '; '.join(tuple_inputpaths)
-        self.input_path.set(inputpaths)
+        if int(self.radio_option.get()) == 0:
+            inputpath = askopenfilename(title="Browse for file", filetypes=[("las file", "*.las")])
+        elif int(self.radio_option.get()) == 1:
+            inputpath = askopenfilename(title="Browse for file", filetypes=[("xyz files", "*.xyz")])
+
+        self.input_path.set(inputpath)
         self.input_entry.delete(0, END)
         self.input_entry.insert(0, self.input_path.get())
 
 
     def __set_output_path(self):
-        outputpath = asksaveasfilename(initialfile=f"Untitled.las", filetypes=[("xyz files", "*.xyz"), ("las files", "*.las")])
+        if int(self.radio_option.get()) == 0:
+            outputpath = asksaveasfilename(initialfile=f"Untitled.xyz", filetypes=[("xyz file", "*.xyz")])
+        elif int(self.radio_option.get()) == 1:
+            outputpath = asksaveasfilename(initialfile=f"Untitled.shp", filetypes=[("shapefile", "*.shp")])
+
         self.output_path.set(outputpath)
         self.output_entry.delete(0, END)
         self.output_entry.insert(0, self.output_path.get())
@@ -72,26 +75,17 @@ class CreateFilesFrame(ttk.LabelFrame):
 
     def __extension_handler(self):
         if int(self.radio_option.get()) == 0:
-            self.input_path.set(f"Input path ({str(self.filetypes[0][0])})")
-            self.input_entry.delete(0, END)
-            self.input_entry.insert(0, self.input_path.get())
-
-            self.output_path.set(f"Results path ({str(self.filetypes[0][1])})")
-            self.output_entry.delete(0, END)
-            self.output_entry.insert(0, self.output_path.get())
+            self.input_path.set(f"Input path (.las)")
+            self.output_path.set(f"Results path (.xyz)")
 
         elif int(self.radio_option.get()) == 1:
-            self.input_path.set(f"Input path ({str(self.filetypes[1][0])})")
-            self.input_entry.delete(0, END)
-            self.input_entry.insert(0, self.input_path.get())
+            self.input_path.set(f"Input path (.xyz)")
+            self.output_path.set(f"Results path (.shp)")
 
-            self.output_path.set(f"Results path ({str(self.filetypes[1][1])})")
-            self.output_entry.delete(0, END)
-            self.output_entry.insert(0, self.output_path.get())
-
-        else:
-            print('Invalid radio option!')
-
+        self.input_entry.delete(0, END)
+        self.input_entry.insert(0, self.input_path.get())
+        self.output_entry.delete(0, END)
+        self.output_entry.insert(0, self.output_path.get())
 
     def __run(self):
         if self.input_entry.get() != '' and self.output_entry != '':
@@ -99,7 +93,5 @@ class CreateFilesFrame(ttk.LabelFrame):
                 create_xyz_from_las(self.input_entry.get(), self.output_entry.get())
             elif int(self.radio_option.get()) == 1:
                 create_shp_from_xyz(self.input_entry.get(), self.output_entry.get())
-            else:
-                print('Invalid radio option!')
         else:
             print('invalid input or output path!')

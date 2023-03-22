@@ -12,7 +12,6 @@ import os
 
 
 def extract_las_class(inpath, outpath, las_calssification):
-    print(inpath, outpath, las_calssification)
     print("Calling extract_las_classification")
     pathlist = [x.strip() for x in inpath.split("; ")]
     las_calssification = int(las_calssification.split(" ", 1)[0])
@@ -46,37 +45,26 @@ def extract_las_class(inpath, outpath, las_calssification):
     return None
 
 
-def create_shp_from_xyz(xyz_file, outpath):
+def create_shp_from_xyz(inpath, outpath):
         print("Calling shp_from_xyz")
-        df = pd.read_csv(xyz_file, sep='\t', header=None)
+        df = pd.read_csv(inpath, sep='\t', header=None)
         df.columns = ['x', 'y', 'z']
         points = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df['x'], df['y']))
         points = points.set_crs(2178, allow_override=True)
-
-        if Path(outpath + '/shp').exists() is False:
-            os.mkdir(outpath + '/shp')
-            print("Saving results to file...")
-            points.to_file(outpath + '/shp//buildings.shp', mode='w')
-        else:
-            print("Saving results to file...")
-            points.to_file(outpath + '/shp//buildings_class.shp', mode='w')
-
-        return points
+        print("Saving results to file...")
+        points.to_file(outpath + '/shp//buildings_class.shp', mode='w')
+        print("The results have been saved!")
+        return None
 
 
-def create_xyz_from_las(las, outpath):
+def create_xyz_from_las(inpath, outpath):
         print("Calling create_xyz_from_las")
-        las = laspy.read(las)
+        las = laspy.read(inpath)
         xyz = las.xyz
-        out = outpath + '/xyz' + '/buildings_xyz.xyz'
-        if Path(outpath + '/xyz').exists() is False:
-            os.mkdir(outpath + '/xyz')
-            print("Saving results to file...")
-            savetxt(out, xyz, delimiter='\t')
-        else:
-            print("Saving results to file...")
-            savetxt(out, xyz, delimiter='\t')
-
+        print("Saving results to file...")
+        savetxt(outpath, xyz, delimiter='\t')
+        print("The results have been saved!")
+        return None
 
 def merge_shp_files(inpath, outpath):
         print("Calling merge_shp_files")

@@ -1,7 +1,7 @@
 from tkinter import ttk, StringVar, IntVar, END
 from tkinter.filedialog import asksaveasfilename, askopenfilenames
-from classification_codes import CLASSIFICATION_CODES
 from las2shp import merge_shp_files, merge_xyz_files
+
 
 class MergeFilesFrame(ttk.LabelFrame):
     def __init__(self, container):
@@ -9,21 +9,11 @@ class MergeFilesFrame(ttk.LabelFrame):
 
         # vars for radio button handling and dynamic change of entries extensions
         self.radio_option = IntVar(value=0)
-        self.filetypes = {
-            0: ["xyz files", ".xyz"],
-            1: ["shp files", ".shp"],
-        }
 
         # input/output paths vars
-        self.input_path = StringVar(value=f"Input directory ({str(self.filetypes[0][0])})")
-        self.output_path = StringVar(value=f"Results path ({str(self.filetypes[0][1])})")
-        # self.input_path.set(f"Input directory ({str(self.radio_option.get())})")
-        # self.output_path.set("Results path (.las)")
+        self.input_path = StringVar(value=f"Input path (.xyz)")
+        self.output_path = StringVar(value=f"Results path (.xyz")
 
-        # #setup the grid layout manager
-        # self.columnconfigure(0, weight=3)
-        # self.columnconfigure(0, weight=1)
-        # self.columnconfigure(0, weight=3)
         self.__create_widgets()
 
 
@@ -56,48 +46,47 @@ class MergeFilesFrame(ttk.LabelFrame):
         self.run_btn = ttk.Button(self, text="RUN", command=lambda: self.__run())
         self.run_btn.grid(column=0, columnspan=3, row=3)
 
-
         for widget in self.winfo_children():
             widget.grid(padx=0, pady=3)
 
 
     def __get_input_path(self):
-        tuple_inputpaths = askopenfilenames(title="Browse for file", filetypes=[("xyz files", "*.xyz"), ("shapefiles", "*.shp")])
-        inputpaths = '; '.join(tuple_inputpaths)
-        self.input_path.set(inputpaths)
-        self.input_entry.delete(0, END)
-        self.input_entry.insert(0, self.input_path.get())
+        if int(self.radio_option.get()) == 0:
+            inputpaths = askopenfilenames(title="Browse for files", filetypes=[("xyz files", ".xyz")])
 
+        elif int(self.radio_option.get()) == 1:
+            inputpaths = askopenfilenames(title="Browse for files", filetypes=[("shapefiles", ".shp")])
+
+        if len(inputpaths) != 0:
+            self.input_entry.delete(0, END)
+            inputpaths = '; '.join(inputpaths)
+            self.input_path.set(inputpaths)
+            self.input_entry.insert(0, self.input_path.get())
 
     def __set_output_path(self):
-        outputpath = asksaveasfilename(initialfile=f"Untitled.las", filetypes=[("xyz files", "*.xyz"), ("shapefiles", "*.shp")])
-        self.output_path.set(outputpath)
-        self.output_entry.delete(0, END)
-        self.output_entry.insert(0, self.output_path.get())
-
+        if int(self.radio_option.get()) == 0:
+            outputpath = asksaveasfilename(initialfile=f"Untitled.xyz",
+                                           filetypes=[("xyz file", ".xyz")])
+        elif int(self.radio_option.get()) == 1:
+            outputpath = asksaveasfilename(initialfile=f"Untitled.shp",
+                                           filetypes=[("Shapefile", ".shp")])
+        if len(outputpath) != 0:
+            self.output_path.set(outputpath)
+            self.output_entry.delete(0, END)
+            self.output_entry.insert(0, self.output_path.get())
 
     def __extension_handler(self):
         if int(self.radio_option.get()) == 0:
-            self.input_path.set(f"Input directory ({str(self.filetypes[0][0])})")
-            self.input_entry.delete(0, END)
-            self.input_entry.insert(0, self.input_path.get())
-
-            self.output_path.set(f"Results path ({str(self.filetypes[0][1])})")
-            self.output_entry.delete(0, END)
-            self.output_entry.insert(0, self.output_path.get())
-
+            self.input_path.set(f"Input path (.xyz)")
+            self.output_path.set(f"Results path (.xyz)")
         elif int(self.radio_option.get()) == 1:
-            self.input_path.set(f"Input directory ({str(self.filetypes[1][0])})")
-            self.input_entry.delete(0, END)
-            self.input_entry.insert(0, self.input_path.get())
+            self.input_path.set(f"Input path (.shp)")
+            self.output_path.set(f"Results path (.shp)")
 
-            self.output_path.set(f"Results path ({str(self.filetypes[1][1])})")
-            self.output_entry.delete(0, END)
-            self.output_entry.insert(0, self.output_path.get())
-
-        else:
-            print('Invalid radio option!')
-
+        self.input_entry.delete(0, END)
+        self.input_entry.insert(0, self.input_path.get())
+        self.output_entry.delete(0, END)
+        self.output_entry.insert(0, self.output_path.get())
 
     def __run(self):
         if self.input_entry.get() != '' and self.output_entry != '':
@@ -105,7 +94,6 @@ class MergeFilesFrame(ttk.LabelFrame):
                 merge_xyz_files(self.input_entry.get(), self.output_entry.get())
             elif int(self.radio_option.get()) == 1:
                 merge_shp_files(self.input_entry.get(), self.output_entry.get())
-            else:
-                print('Invalid radio option!')
+
         else:
             print('invalid input or output path!')
