@@ -1,5 +1,5 @@
 from las2shp import clip_xyz_to_poly, intersect_using_spatial_index
-from tkinter import ttk, StringVar, IntVar, END
+from tkinter import ttk, StringVar, END
 from tkinter.filedialog import asksaveasfilename, askopenfilename
 
 class ClipXyzToPolyFrame(ttk.LabelFrame):
