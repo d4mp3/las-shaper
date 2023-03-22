@@ -11,11 +11,6 @@ class ExtractLasClassFrame(ttk.LabelFrame):
         self.input_path = StringVar()
         self.output_path = StringVar()
         self.dropdown_option = StringVar()
-
-        # #setup the grid layout manager
-        # self.columnconfigure(0, weight=1)
-        # self.columnconfigure(0, weight=3)
-        # self.columnconfigure(0, weight=1)
         self.__create_widgets()
 
 
@@ -60,7 +55,7 @@ class ExtractLasClassFrame(ttk.LabelFrame):
 
 
     def __get_input_path(self):
-        tuple_inputpaths = askopenfilenames(title="Browse for file", filetypes=[("las files", "*.las")])
+        tuple_inputpaths = askopenfilenames(title="Browse for .las files", filetypes=[("las files", "*.las")])
         inputpaths = '; '.join(tuple_inputpaths)
         self.input_path.set(inputpaths)
         self.input_entry.delete(0, END)

@@ -12,7 +12,7 @@ class MergeFilesFrame(ttk.LabelFrame):
 
         # input/output paths vars
         self.input_path = StringVar(value=f"Input path (.xyz)")
-        self.output_path = StringVar(value=f"Results path (.xyz")
+        self.output_path = StringVar(value=f"Results path (.xyz)")
 
         self.__create_widgets()
 
@@ -52,10 +52,10 @@ class MergeFilesFrame(ttk.LabelFrame):
 
     def __get_input_path(self):
         if int(self.radio_option.get()) == 0:
-            inputpaths = askopenfilenames(title="Browse for files", filetypes=[("xyz files", ".xyz")])
+            inputpaths = askopenfilenames(title="Browse for .xyz files", filetypes=[("xyz files", ".xyz")])
 
         elif int(self.radio_option.get()) == 1:
-            inputpaths = askopenfilenames(title="Browse for files", filetypes=[("shapefiles", ".shp")])
+            inputpaths = askopenfilenames(title="Browse for Shapefiles", filetypes=[("Shapefiles", ".shp")])
 
         if len(inputpaths) != 0:
             self.input_entry.delete(0, END)

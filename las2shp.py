@@ -115,7 +115,7 @@ def merge_xyz_files(inpath, outpath):
         print("Results have been saved!")
 
 
-def dem_handler(inpath, outpath, poly):
+def clip_xyz_to_poly(inpath, outpath, poly):
         print("Calling create_gdf_from_xyz")
         pathlist = list(Path(inpath).glob('**/*.xyz'))
 

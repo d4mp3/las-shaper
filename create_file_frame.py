@@ -53,9 +53,9 @@ class CreateFileFrame(ttk.LabelFrame):
 
     def __get_input_path(self):
         if int(self.radio_option.get()) == 0:
-            inputpath = askopenfilename(title="Browse for file", filetypes=[("las file", "*.las")])
+            inputpath = askopenfilename(title="Browse for .las file", filetypes=[("las file", "*.las")])
         elif int(self.radio_option.get()) == 1:
-            inputpath = askopenfilename(title="Browse for file", filetypes=[("xyz files", "*.xyz")])
+            inputpath = askopenfilename(title="Browse for .xyz file", filetypes=[("xyz file", "*.xyz")])
 
         self.input_path.set(inputpath)
         self.input_entry.delete(0, END)

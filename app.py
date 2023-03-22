@@ -6,6 +6,7 @@ from las2shp import *
 from extract_las_class_frame import ExtractLasClassFrame
 from merge_files_frame import MergeFilesFrame
 from create_file_frame import CreateFileFrame
+from clip_xyz_to_poly_frame import ClipXyzToPolyFrame
 
 
 class App(tk.Tk):
@@ -15,7 +16,6 @@ class App(tk.Tk):
         self.geometry('850x350')
         self.resizable(0, 0)
         self.__create_widgets()
-
 
     def __create_widgets(self):
         # create the extract las class frame
@@ -29,6 +29,10 @@ class App(tk.Tk):
         # create the create file frame
         create_files_frame = CreateFileFrame(self)
         create_files_frame.grid(column=0, row=1, padx=10, pady=5)
+
+        # create the clip xyz to poly frame
+        clip_xyz_to_poly_frame = ClipXyzToPolyFrame(self)
+        clip_xyz_to_poly_frame.grid(column=1, row=1, padx=10, pady=5)
 
 
 if __name__ == "__main__":
