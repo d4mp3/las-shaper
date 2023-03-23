@@ -41,7 +41,7 @@ def extract_las_class(inpath, outpath, las_calssification):
                     print("Saving results to file...")
                     ground_las.append_points(
                         input_las.points[input_las.classification == las_calssification])
-        print("Results have been saved!")
+        print("The results have been saved!")
     return None
 
 
@@ -52,7 +52,7 @@ def create_shp_from_xyz(inpath, outpath):
         points = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df['x'], df['y']))
         points = points.set_crs(2178, allow_override=True)
         print("Saving results to file...")
-        points.to_file(outpath + '/shp//buildings_class.shp', mode='w')
+        points.to_file(outpath, mode='w')
         print("The results have been saved!")
         return None
 
@@ -95,7 +95,8 @@ def merge_shp_files(inpath, outpath):
         # else:
         #     results.to_file(outpath + '/shp/dem_results.shp', mode='w')
 
-        print("Results have been saved!")
+        print("The results have been saved!")
+        return None
 
 
 def merge_xyz_files(inpath, outpath):
@@ -112,12 +113,15 @@ def merge_xyz_files(inpath, outpath):
 
         xyz_file.close()
         new_file.close()
-        print("Results have been saved!")
+        print("The results have been saved!")
 
 
 def clip_xyz_to_poly(inpath, outpath, poly):
         print("Calling create_gdf_from_xyz")
-        pathlist = list(Path(inpath).glob('**/*.xyz'))
+        print("Reading shapefile")
+        poly = gpd.read_file(poly)
+        pathlist = [x.strip() for x in inpath.split("; ")]
+        # pathlist = list(Path(inpath).glob('**/*.xyz'))
 
         for counter, path in enumerate(pathlist):
             filename = Path(path).stem
@@ -131,11 +135,9 @@ def clip_xyz_to_poly(inpath, outpath, poly):
 
             if len(results) > 1:
                 print("Saving results to file...")
-                if Path(outpath + '/shp').exists() is False:
-                    os.mkdir(outpath + '/shp')
-                    results.to_file(outpath + '/shp//dem//' + filename + '.shp', mode='w')
-                else:
-                    results.to_file(outpath + '/shp//dem//' + filename + '.shp', mode='w')
+                results.to_file(outpath, mode='w')
+        print("The results have been saved!")
+
 
 
 def intersect_using_spatial_index(source_gdf, intersecting_gdf):
@@ -163,14 +165,15 @@ def intersect_using_spatial_index(source_gdf, intersecting_gdf):
         return result
 
 
-def get_max_value(poly, dem_points, bldg_points, outpath):
+def get_max_value(poly, dem_points, dsm_points, outpath):
         print("Calling get_max_value")
         print("Loading polygon layer...")
         poly = gpd.read_file(poly)
         print("Loading dem points layer...")
+        print(type(dem_points))
         dem_points = gpd.read_file(dem_points)
-        print("Loading buildings points layer...")
-        bldg_points = gpd.read_file(bldg_points)
+        print("Loading dsm points layer...")
+        dsm_points = gpd.read_file(dsm_points)
 
         # checks if one point of points' list is in polygon geometry
         # if True joins attributes
@@ -195,12 +198,9 @@ def get_max_value(poly, dem_points, bldg_points, outpath):
 
             return results
 
-        outcome = spatial_join(poly, [dem_points, bldg_points])
+        outcome = spatial_join(poly, [dem_points, dsm_points])
         outcome['delta_z'] = outcome['z_1'] - outcome['z_0']
 
         print("Saving results to file...")
-        if Path(outpath + '/shp').exists() is False:
-            os.mkdir(outpath + '/shp')
-            outcome.to_file(outpath + '/shp/buildings_with_max_z_value.shp', mode='w')
-        else:
-            outcome.to_file(outpath + '/shp/buildings_with_max_z_value.shp', mode='w')
+        outcome.to_file(outpath, mode='w')
+        print("The results have been saved!")

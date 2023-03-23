@@ -1,11 +1,11 @@
-from las2shp import get_max_value
+from las_shaper import get_max_value
 from tkinter import ttk, StringVar, END
 from tkinter.filedialog import asksaveasfilename, askopenfilename
 
 
 class GetMaxHeightFrame(ttk.LabelFrame):
     def __init__(self, container):
-        super().__init__(container, text='ASSIGN MAX HEIGHT TO FEATURES IN SHAPEFILE')
+        super().__init__(container, text='GET MAX HEIGHT')
 
         self.dem_input_path = StringVar()
         self.dsm_input_path = StringVar()
@@ -18,7 +18,7 @@ class GetMaxHeightFrame(ttk.LabelFrame):
         self.dem_input_entry = ttk.Entry(self)
         self.dem_input_entry.grid(column=0, columnspan=2, row=0)
         self.dem_input_entry.config(width=45)
-        self.dem_input_path.set("DEM input (.xyz)")
+        self.dem_input_path.set("DEM points input (.shp)")
         self.dem_input_entry.insert(0, self.dem_input_path.get())
         self.dem_input_btn = ttk.Button(self, text="...", command=lambda: self.__get_input_path('dem'))
         self.dem_input_btn.grid(column=2, row=0, sticky="W")
@@ -28,7 +28,7 @@ class GetMaxHeightFrame(ttk.LabelFrame):
         self.dsm_input_entry = ttk.Entry(self)
         self.dsm_input_entry.grid(column=0, columnspan=2, row=1)
         self.dsm_input_entry.config(width=45)
-        self.dsm_input_path.set("DSM input (.xyz)")
+        self.dsm_input_path.set("DSM points input (.shp)")
         self.dsm_input_entry.insert(0, self.dsm_input_path.get())
         self.dsm_input_btn = ttk.Button(self, text="...", command=lambda: self.__get_input_path('dsm'))
         self.dsm_input_btn.grid(column=2, row=1, sticky="W")
@@ -63,7 +63,7 @@ class GetMaxHeightFrame(ttk.LabelFrame):
 
     def __get_input_path(self, las_model=None):
         if las_model:
-            inputpath = askopenfilename(title="Browse for .xyz file", filetypes=[("xyz file", "*.xyz")])
+            inputpath = askopenfilename(title="Browse for Shapefile", filetypes=[("Shapefile", "*.shp")])
             if las_model == "dem":
                 if len(inputpath) != 0:
                     self.dem_input_path.set(inputpath)
@@ -89,7 +89,7 @@ class GetMaxHeightFrame(ttk.LabelFrame):
             self.output_entry.insert(0, self.output_path.get())
 
     def __run(self):
-        if self.input_entry.get() != '' and self.output_entry != '':
-            get_max_value(self.input_entry.get(), self.output_entry.get(), self.dropdown_option.get()[0])
+        if self.shp_input_path.get() != '' and self.dem_input_path.get() != '' and self.dsm_input_path.get() != '' and self.output_path.get() != '':
+            get_max_value(self.shp_input_path.get(), self.dem_input_path.get(), self.dsm_input_path.get(), self.output_path.get())
         else:
             print('invalid input or output path')

@@ -1,7 +1,7 @@
 from tkinter import ttk, StringVar, END
 from tkinter.filedialog import asksaveasfilename, askopenfilenames
 from classification_codes import CLASSIFICATION_CODES
-from las2shp import extract_las_class
+from las_shaper import extract_las_class
 
 
 class ExtractLasClassFrame(ttk.LabelFrame):
@@ -56,17 +56,21 @@ class ExtractLasClassFrame(ttk.LabelFrame):
 
     def __get_input_path(self):
         tuple_inputpaths = askopenfilenames(title="Browse for .las files", filetypes=[("las files", "*.las")])
-        inputpaths = '; '.join(tuple_inputpaths)
-        self.input_path.set(inputpaths)
-        self.input_entry.delete(0, END)
-        self.input_entry.insert(0, self.input_path.get())
+
+        if len(tuple_inputpaths) != 0:
+            inputpaths = '; '.join(tuple_inputpaths)
+            self.input_path.set(inputpaths)
+            self.input_entry.delete(0, END)
+            self.input_entry.insert(0, self.input_path.get())
 
 
     def __set_output_path(self):
         outputpath = asksaveasfilename(initialfile=f"Untitled.las", filetypes=[("las files", "*.las")])
-        self.output_path.set(outputpath)
-        self.output_entry.delete(0, END)
-        self.output_entry.insert(0, self.output_path.get())
+
+        if len(outputpath) != 0:
+            self.output_path.set(outputpath)
+            self.output_entry.delete(0, END)
+            self.output_entry.insert(0, self.output_path.get())
 
 
     def __run(self):

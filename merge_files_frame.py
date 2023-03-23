@@ -1,6 +1,6 @@
 from tkinter import ttk, StringVar, IntVar, END
 from tkinter.filedialog import asksaveasfilename, askopenfilenames
-from las2shp import merge_shp_files, merge_xyz_files
+from las_shaper import merge_shp_files, merge_xyz_files
 
 
 class MergeFilesFrame(ttk.LabelFrame):

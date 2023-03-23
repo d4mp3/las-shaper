@@ -1,11 +1,11 @@
 from tkinter import ttk, StringVar, IntVar, END
 from tkinter.filedialog import asksaveasfilename, askopenfilename
-from las2shp import create_xyz_from_las, create_shp_from_xyz
+from las_shaper import create_xyz_from_las, create_shp_from_xyz
 
 
-class CreateFileFrame(ttk.LabelFrame):
+class ConvertFileFrame(ttk.LabelFrame):
     def __init__(self, container):
-        super().__init__(container, text='CREATE FILES')
+        super().__init__(container, text='CONVERT FILES')
 
         # vars for radio button handling and dynamic change of entries extensions
         self.radio_option = IntVar(value=0)
@@ -57,9 +57,10 @@ class CreateFileFrame(ttk.LabelFrame):
         elif int(self.radio_option.get()) == 1:
             inputpath = askopenfilename(title="Browse for .xyz file", filetypes=[("xyz file", "*.xyz")])
 
-        self.input_path.set(inputpath)
-        self.input_entry.delete(0, END)
-        self.input_entry.insert(0, self.input_path.get())
+        if len(inputpath) != 0:
+            self.input_path.set(inputpath)
+            self.input_entry.delete(0, END)
+            self.input_entry.insert(0, self.input_path.get())
 
 
     def __set_output_path(self):
@@ -68,9 +69,10 @@ class CreateFileFrame(ttk.LabelFrame):
         elif int(self.radio_option.get()) == 1:
             outputpath = asksaveasfilename(initialfile=f"Untitled.shp", filetypes=[("shapefile", "*.shp")])
 
-        self.output_path.set(outputpath)
-        self.output_entry.delete(0, END)
-        self.output_entry.insert(0, self.output_path.get())
+        if len(outputpath) != 0:
+            self.output_path.set(outputpath)
+            self.output_entry.delete(0, END)
+            self.output_entry.insert(0, self.output_path.get())
 
 
     def __extension_handler(self):

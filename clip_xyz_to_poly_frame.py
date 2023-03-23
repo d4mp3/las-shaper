@@ -1,6 +1,6 @@
-from las2shp import clip_xyz_to_poly, intersect_using_spatial_index
+from las_shaper import clip_xyz_to_poly, intersect_using_spatial_index
 from tkinter import ttk, StringVar, END
-from tkinter.filedialog import asksaveasfilename, askopenfilename
+from tkinter.filedialog import asksaveasfilename, askopenfilename, askopenfilenames
 
 class ClipXyzToPolyFrame(ttk.LabelFrame):
     def __init__(self, container):
@@ -21,7 +21,6 @@ class ClipXyzToPolyFrame(ttk.LabelFrame):
         self.xyz_input_btn = ttk.Button(self, text="...", command=lambda: self.__get_input_path('.xyz'))
         self.xyz_input_btn.grid(column=2, row=0, sticky="W")
         self.xyz_input_btn.config(width=3)
-
 
         # polygon input entry
         self.poly_input_entry = ttk.Entry(self)
@@ -52,9 +51,10 @@ class ClipXyzToPolyFrame(ttk.LabelFrame):
 
     def __get_input_path(self, file_extension):
         if file_extension == '.xyz':
-            inputpath = askopenfilename(title="Browse for .xyz file", filetypes=[("xyz file", "*.xyz")])
-            if len(inputpath) != 0:
-                self.xyz_input_path.set(inputpath)
+            inputpaths = askopenfilenames(title="Browse for .xyz files", filetypes=[("xyz file", "*.xyz")])
+            if len(inputpaths) != 0:
+                inputpaths = '; '.join(inputpaths)
+                self.xyz_input_path.set(inputpaths)
                 self.xyz_input_entry.delete(0, END)
                 self.xyz_input_entry.insert(0, self.xyz_input_path.get())
         elif file_extension == '.shp':
@@ -72,7 +72,7 @@ class ClipXyzToPolyFrame(ttk.LabelFrame):
             self.output_entry.insert(0, self.output_path.get())
 
     def __run(self):
-        if self.input_entry.get() != '' and self.output_entry != '':
-            clip_xyz_to_poly(self.input_entry.get(), self.output_entry.get(), self.dropdown_option.get()[0])
+        if self.xyz_input_path.get() != '' and self.poly_input_path.get() != '' and self.output_entry.get() != '':
+            clip_xyz_to_poly(self.xyz_input_path.get(), self.output_entry.get(), self.poly_input_path.get())
         else:
             print('invalid input or output path')

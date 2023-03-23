@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 from extract_las_class_frame import ExtractLasClassFrame
 from merge_files_frame import MergeFilesFrame
-from create_file_frame import CreateFileFrame
+from convert_file_frame import ConvertFileFrame
 from clip_xyz_to_poly_frame import ClipXyzToPolyFrame
 from get_max_height_frame import GetMaxHeightFrame
 
@@ -10,7 +10,7 @@ from get_max_height_frame import GetMaxHeightFrame
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title('Las2Shp')
+        self.title('Las-Shaper')
         self.geometry('850x540')
         self.resizable(0, 0)
         self.__create_widgets()
@@ -36,9 +36,9 @@ class App(tk.Tk):
         merge_files_frame = MergeFilesFrame(self)
         merge_files_frame.grid(column=1, row=0, padx=10, pady=5)
 
-        # create the create file frame
-        create_files_frame = CreateFileFrame(self)
-        create_files_frame.grid(column=0, row=1, padx=10, pady=5)
+        # create the convert file frame
+        convert_file_frame = ConvertFileFrame(self)
+        convert_file_frame.grid(column=0, row=1, padx=10, pady=5)
 
         # create the clip xyz to poly frame
         clip_xyz_to_poly_frame = ClipXyzToPolyFrame(self)
