@@ -673,7 +673,7 @@ p, li { white-space: pre-wrap; }
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroupMF"/>
   <buttongroup name="buttonGroupCF"/>
+  <buttongroup name="buttonGroupMF"/>
  </buttongroups>
 </ui>
