@@ -26,6 +26,9 @@ import os
 
 from qgis.PyQt import uic
 from qgis.PyQt import QtWidgets
+from qgis.PyQt.QtWidgets import QFileDialog
+from .las_shaper_functions import *
+from .classification_codes import *
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
@@ -42,3 +45,13 @@ class LasShaperDialog(QtWidgets.QDialog, FORM_CLASS):
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
+        self.cbClassificationCode.addItems(CLASSIFICATION_CODES.values())
+        self.tbInputELC.clicked.connect(self.__get_input_path)
+
+    def __get_input_path(self):
+        input_path = QFileDialog.getOpenFileName(self, "Open File", "", "All Files (*);;Python Files (*.py)")
+
+        if input_path:
+            self.leInputELC.setText(str(input_path))
+
+
