@@ -46,15 +46,21 @@ class LasShaperDialog(QtWidgets.QDialog, FORM_CLASS):
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
 
-        # Extract Las Class Frame
+        # Extract Las class frame
         self.cbClassificationCode.addItems(CLASSIFICATION_CODES.values())
         self.tbInputELC.clicked.connect(self.__get_elc_input)
         self.tbOutputELC.clicked.connect(self.__set_elc_output)
         self.pbELC.clicked.connect(self.__run_extract_las_class)
 
+        # Clip XYZ to polygon frame
+        self.tbInputPathCXTP.clicked.connect(self.__get_cxtp_xyz_input)
+        self.tbInputPolygonPathCXTP.clicked.connect(self.__get_cxtp_polygon_input)
+        self.tbOutputCXTP.clicked.connect(self.__set_cxtp_output)
+        self.pbCXTP.clicked.connect(self.__run_clip_xyz_to_polygon)
+
 
     def __get_elc_input(self):
-        input_path = QFileDialog.getOpenFileNames(self, "Open Files", "", "LAS Files (*.las)")
+        input_path = QFileDialog.getOpenFileNames(self, "Open LAS Files", "", "LAS Files (*.las)")
         if len(input_path[0]) != 0:
             input_path = input_path[0]
             input_path = '; '.join(input_path)
@@ -74,3 +80,29 @@ class LasShaperDialog(QtWidgets.QDialog, FORM_CLASS):
         else:
             print('invalid input or output path')
 
+
+    def __get_cxtp_xyz_input(self):
+        input_path = QFileDialog.getOpenFileName(self, "Open XYZ File", "", "XYZ Files (*.xyz)")
+        if len(input_path[0]) != 0:
+            input_path = input_path[0]
+            self.leInputPathCXTP.setText(str(input_path))
+
+
+    def __get_cxtp_polygon_input(self):
+        input_path = QFileDialog.getOpenFileName(self, "Open Shapefile", "", "Shapefile (*.shp)")
+        if len(input_path[0]) != 0:
+            input_path = input_path[0]
+            self.leInputPolygonPathCXTP.setText(str(input_path))
+
+
+    def __set_cxtp_output(self):
+        output_path = QFileDialog.getSaveFileName(self, "Save File", "", "Shapefile (*.shp)")
+        if len(output_path[0]) != 0:
+            self.leOutputCXTP.setText(str(output_path[0]))
+
+
+    def __run_clip_xyz_to_polygon(self):
+        if self.leInputPathCXTP != '' and self.leInputPolygonPathCXTP != '' and self.leOutputCXTP != '':
+            clip_xyz_to_poly(self.leInputPathCXTP.text(), self.leOutputCXTP.text(), self.leInputPolygonPathCXTP.text())
+        else:
+            print('invalid input or output path')
