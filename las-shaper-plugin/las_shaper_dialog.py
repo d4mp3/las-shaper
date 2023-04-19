@@ -45,13 +45,32 @@ class LasShaperDialog(QtWidgets.QDialog, FORM_CLASS):
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
+
+        # Extract Las Class Frame
         self.cbClassificationCode.addItems(CLASSIFICATION_CODES.values())
-        self.tbInputELC.clicked.connect(self.__get_input_path)
+        self.tbInputELC.clicked.connect(self.__get_elc_input)
+        self.tbOutputELC.clicked.connect(self.__set_elc_output)
+        self.pbELC.clicked.connect(self.__run_extract_las_class)
 
-    def __get_input_path(self):
-        input_path = QFileDialog.getOpenFileName(self, "Open File", "", "All Files (*);;Python Files (*.py)")
 
-        if input_path:
+    def __get_elc_input(self):
+        input_path = QFileDialog.getOpenFileNames(self, "Open Files", "", "LAS Files (*.las)")
+        if len(input_path[0]) != 0:
+            input_path = input_path[0]
+            input_path = '; '.join(input_path)
             self.leInputELC.setText(str(input_path))
 
+
+    def __set_elc_output(self):
+        output_path = QFileDialog.getSaveFileName(self, "Save File", "", "LAS File (*.las)")
+        if len(output_path[0]) != 0:
+            self.leOutputELC.setText(str(output_path[0]))
+
+
+    def __run_extract_las_class(self):
+        las_class = [list(CLASSIFICATION_CODES.values()).index(self.cbClassificationCode.currentText())]
+        if self.tbInputELC != '' and self.tbOutputELC != '':
+            extract_las_class(self.leInputELC.text(), self.leOutputELC.text(), las_class)
+        else:
+            print('invalid input or output path')
 

@@ -12,9 +12,10 @@ import os
 
 
 def extract_las_class(inpath, outpath, las_calssification):
+    print(inpath, outpath, las_calssification)
     print("Calling extract_las_classification")
     pathlist = [x.strip() for x in inpath.split("; ")]
-    las_calssification = int(las_calssification.split(" ", 1)[0])
+    las_calssification = las_calssification[0]
 
     # if Path(outpath).exists() is False:
     #     os.mkdir(outpath + '/las')
