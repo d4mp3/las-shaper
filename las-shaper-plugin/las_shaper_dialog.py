@@ -58,6 +58,17 @@ class LasShaperDialog(QtWidgets.QDialog, FORM_CLASS):
         self.tbOutputCXTP.clicked.connect(self.__set_cxtp_output)
         self.pbCXTP.clicked.connect(self.__run_clip_xyz_to_polygon)
 
+        # Get max height frame
+        self.tbDemInputGMH.clicked.connect(self.__get_gmh_dem_input)
+        self.tbleDsmInputGMH.clicked.connect(self.__get_gmh_dsm_input)
+        self.tbShpInputGMH.clicked.connect(self.__get_gmh_shp_input)
+        self.tbOutputGMH.clicked.connect(self.__set_gmh_output)
+        self.pbGMH.clicked.connect(self.__run_get_max_height)
+
+
+        # Merge files frame
+
+
 
     def __get_elc_input(self):
         input_path = QFileDialog.getOpenFileNames(self, "Open LAS Files", "", "LAS Files (*.las)")
@@ -106,3 +117,62 @@ class LasShaperDialog(QtWidgets.QDialog, FORM_CLASS):
             clip_xyz_to_poly(self.leInputPathCXTP.text(), self.leOutputCXTP.text(), self.leInputPolygonPathCXTP.text())
         else:
             print('invalid input or output path')
+
+
+    def __get_gmh_dem_input(self):
+        input_path = QFileDialog.getOpenFileName(self, "Open DEM points Shapefile", "", "Shapefile (*.shp)")
+        if len(input_path[0]) != 0:
+            input_path = input_path[0]
+            self.leDemInputGMH.setText(str(input_path))
+
+
+    def __get_gmh_dsm_input(self):
+        input_path = QFileDialog.getOpenFileName(self, "Open DSM points Shapefile", "", "Shapefile (*.shp)")
+        if len(input_path[0]) != 0:
+            input_path = input_path[0]
+            self.leDsmInputGMH.setText(str(input_path))
+
+
+    def __get_gmh_shp_input(self):
+        input_path = QFileDialog.getOpenFileName(self, "Open polygon Shapefile", "", "Shapefile (*.shp)")
+        if len(input_path[0]) != 0:
+            input_path = input_path[0]
+            self.leShpInputGMH.setText(str(input_path))
+
+
+    def __set_gmh_output(self):
+        output_path = QFileDialog.getSaveFileName(self, "Save File", "", "Shapefile (*.shp)")
+        if len(output_path[0]) != 0:
+            self.leOutputGMH.setText(str(output_path[0]))
+
+
+    def __run_get_max_height(self):
+        if self.leDemInputGMH != '' and self.leDsmInputGMH != '' and self.leDsmInputGMH != '' and self.leOutputGMH != '':
+            get_max_value(self.leShpInputGMH.text(), self.leDemInputGMH.text(), self.leDsmInputGMH.text(), self.leOutputGMH.text())
+        else:
+            print('invalid input or output path')
+
+
+    def __set_mg_input(self):
+        ...
+
+
+    def __get_mg_output(self):
+        ...
+
+
+    def __run_merge_files(self):
+        ...
+
+
+    def __get_cf_input(self):
+        ...
+
+
+    def __set_cf_output(self):
+        ...
+
+
+    def __run_convert_files(self):
+        ...
+    
