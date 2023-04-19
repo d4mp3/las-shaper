@@ -67,7 +67,15 @@ class LasShaperDialog(QtWidgets.QDialog, FORM_CLASS):
 
 
         # Merge files frame
+        self.tbInputMF.clicked.connect(self.__set_mf_input)
+        self.tbOutputMF.clicked.connect(self.__get_mf_output)
+        self.pbMF.clicked.connect(self.__run_merge_files)
 
+
+        # Convert files frame
+        self.tbInputCF.clicked.connect(self.__set_mf_input)
+        self.tbOutputCF.clicked.connect(self.__get_mf_output)
+        self.pbCF.clicked.connect(self.__run_convert_files)
 
 
     def __get_elc_input(self):
@@ -153,11 +161,11 @@ class LasShaperDialog(QtWidgets.QDialog, FORM_CLASS):
             print('invalid input or output path')
 
 
-    def __set_mg_input(self):
+    def __set_mf_input(self):
         ...
 
 
-    def __get_mg_output(self):
+    def __get_mf_output(self):
         ...
 
 
@@ -175,4 +183,3 @@ class LasShaperDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def __run_convert_files(self):
         ...
-    
