@@ -49,24 +49,24 @@ class LasShaperDialog(QtWidgets.QDialog, FORM_CLASS):
         # Extract Las class frame
         self.cbClassificationCode.addItems(CLASSIFICATION_CODES.values())
         self.tbInputELC.clicked.connect(self.__get_elc_input)
-        self.tbOutputELC.clicked.connect(self.__set_elc_output)
+        self.tbOutputELC.clicked.connect(self.__get_elc_output)
         self.pbELC.clicked.connect(self.__run_extract_las_class)
 
         # Clip XYZ to polygon frame
         self.tbInputPathCXTP.clicked.connect(self.__get_cxtp_xyz_input)
         self.tbInputPolygonPathCXTP.clicked.connect(self.__get_cxtp_polygon_input)
-        self.tbOutputCXTP.clicked.connect(self.__set_cxtp_output)
+        self.tbOutputCXTP.clicked.connect(self.__get_cxtp_output)
         self.pbCXTP.clicked.connect(self.__run_clip_xyz_to_polygon)
 
         # Get max height frame
         self.tbDemInputGMH.clicked.connect(self.__get_gmh_dem_input)
         self.tbleDsmInputGMH.clicked.connect(self.__get_gmh_dsm_input)
         self.tbShpInputGMH.clicked.connect(self.__get_gmh_shp_input)
-        self.tbOutputGMH.clicked.connect(self.__set_gmh_output)
+        self.tbOutputGMH.clicked.connect(self.__get_gmh_output)
         self.pbGMH.clicked.connect(self.__run_get_max_height)
 
         # Merge files frame
-        self.tbInputMF.clicked.connect(self.__set_mf_input)
+        self.tbInputMF.clicked.connect(self.__get_mf_input)
         self.tbOutputMF.clicked.connect(self.__get_mf_output)
         self.pbMF.clicked.connect(self.__run_merge_files)
         self.rbXyzMF.setChecked(True)
@@ -78,7 +78,7 @@ class LasShaperDialog(QtWidgets.QDialog, FORM_CLASS):
 
         # Convert files frame
         self.tbInputCF.clicked.connect(self.__get_cf_input)
-        self.tbOutputCF.clicked.connect(self.__set_cf_output)
+        self.tbOutputCF.clicked.connect(self.__get_cf_output)
         self.pbCF.clicked.connect(self.__run_convert_files)
         self.rbLasToXyzCF.setChecked(True)
         self.cf_input_extension = "(.las)"
@@ -91,12 +91,11 @@ class LasShaperDialog(QtWidgets.QDialog, FORM_CLASS):
     def __get_elc_input(self):
         input_path = QFileDialog.getOpenFileNames(self, "Open LAS Files", "", "LAS Files (*.las)")
         if len(input_path[0]) != 0:
-            input_path = input_path[0]
-            input_path = '; '.join(input_path)
+            input_path = '; '.join(input_path[0])
             self.leInputELC.setText(str(input_path))
 
 
-    def __set_elc_output(self):
+    def __get_elc_output(self):
         output_path = QFileDialog.getSaveFileName(self, "Save File", "", "LAS File (*.las)")
         if len(output_path[0]) != 0:
             self.leOutputELC.setText(str(output_path[0]))
@@ -113,18 +112,16 @@ class LasShaperDialog(QtWidgets.QDialog, FORM_CLASS):
     def __get_cxtp_xyz_input(self):
         input_path = QFileDialog.getOpenFileName(self, "Open XYZ File", "", "XYZ Files (*.xyz)")
         if len(input_path[0]) != 0:
-            input_path = input_path[0]
-            self.leInputPathCXTP.setText(str(input_path))
+            self.leInputPathCXTP.setText(str(input_path[0]))
 
 
     def __get_cxtp_polygon_input(self):
         input_path = QFileDialog.getOpenFileName(self, "Open Shapefile", "", "Shapefile (*.shp)")
         if len(input_path[0]) != 0:
-            input_path = input_path[0]
-            self.leInputPolygonPathCXTP.setText(str(input_path))
+            self.leInputPolygonPathCXTP.setText(str(input_path[0]))
 
 
-    def __set_cxtp_output(self):
+    def __get_cxtp_output(self):
         output_path = QFileDialog.getSaveFileName(self, "Save File", "", "Shapefile (*.shp)")
         if len(output_path[0]) != 0:
             self.leOutputCXTP.setText(str(output_path[0]))
@@ -140,25 +137,22 @@ class LasShaperDialog(QtWidgets.QDialog, FORM_CLASS):
     def __get_gmh_dem_input(self):
         input_path = QFileDialog.getOpenFileName(self, "Open DEM points Shapefile", "", "Shapefile (*.shp)")
         if len(input_path[0]) != 0:
-            input_path = input_path[0]
-            self.leDemInputGMH.setText(str(input_path))
+            self.leDemInputGMH.setText(str(input_path[0]))
 
 
     def __get_gmh_dsm_input(self):
         input_path = QFileDialog.getOpenFileName(self, "Open DSM points Shapefile", "", "Shapefile (*.shp)")
         if len(input_path[0]) != 0:
-            input_path = input_path[0]
-            self.leDsmInputGMH.setText(str(input_path))
+            self.leDsmInputGMH.setText(str(input_path[0]))
 
 
     def __get_gmh_shp_input(self):
         input_path = QFileDialog.getOpenFileName(self, "Open polygon Shapefile", "", "Shapefile (*.shp)")
         if len(input_path[0]) != 0:
-            input_path = input_path[0]
-            self.leShpInputGMH.setText(str(input_path))
+            self.leShpInputGMH.setText(str(input_path[0]))
 
 
-    def __set_gmh_output(self):
+    def __get_gmh_output(self):
         output_path = QFileDialog.getSaveFileName(self, "Save File", "", "Shapefile (*.shp)")
         if len(output_path[0]) != 0:
             self.leOutputGMH.setText(str(output_path[0]))
@@ -171,29 +165,27 @@ class LasShaperDialog(QtWidgets.QDialog, FORM_CLASS):
             print('invalid input or output path')
 
 
-    def __set_mf_input(self):
+    def __get_mf_input(self):
         if self.rbXyzMF.isChecked() is True:
             input_path = QFileDialog.getOpenFileNames(self, "Open XYZ File", "", "XYZ Files (*.xyz)")
 
         elif self.rbShpMF.isChecked() is True:
-            input_path = QFileDialog.getOpenFileNames(self, "Open Shapefiles", "", "Shapefiles (.shp)")
+            input_path = QFileDialog.getOpenFileNames(self, "Open Shapefiles", "", "Shapefiles (*.shp)")
 
         if len(input_path[0]) != 0:
-            input_path = input_path[0]
-            input_path = '; '.join(input_path)
+            input_path = '; '.join(input_path[0])
             self.leInputMF.setText(str(input_path))
 
 
     def __get_mf_output(self):
         if self.rbXyzMF.isChecked() is True:
-            output_path = QFileDialog.getOpenFileNames(self, "Open XYZ Files", "", "XYZ Files (*.xyz)")
+            output_path = QFileDialog.getSaveFileName(self, "Save XYZ file", "", "XYZ File (*.xyz)")
 
         elif self.rbShpMF.isChecked() is True:
-            output_path = QFileDialog.getOpenFileNames(self, "Open Shapefiles", "", "Shapefiles (.shp)")
+            output_path = QFileDialog.getSaveFileName(self, "Save Shapefile", "", "Shapefile (*.shp)")
 
         if len(output_path[0]) != 0:
-            output_path = output_path[0]
-            self.leOutputMF.setText(str(output_path))
+            self.leOutputMF.setText(str(output_path[0]))
 
 
     def __mf__extension_handler(self):
@@ -222,27 +214,25 @@ class LasShaperDialog(QtWidgets.QDialog, FORM_CLASS):
             print('invalid input or output path!')
 
     def __get_cf_input(self):
-        if self.rbXyzMF.isChecked() is True:
-            input_path = QFileDialog.getOpenFileNames(self, "Open XYZ File", "", "XYZ File (*.xyz)")
-
-        elif self.rbShpMF.isChecked() is True:
-            input_path = QFileDialog.getOpenFileNames(self, "Open Shapefile", "", "Shapefile (.shp)")
-
-        if len(input_path[0]) != 0:
-            input_path = input_path[0]
-            self.leInputMF.setText(str(input_path))
-
-
-    def __set_cf_output(self):
         if self.rbLasToXyzCF.isChecked() is True:
-            output_path = QFileDialog.getOpenFileName(self, "Save XYZ File", "", "XYZ File (*.xyz)")
+            input_path = QFileDialog.getOpenFileName(self, "Open LAS File", "", "LAS File (*.las)")
 
         elif self.rbXyzToShpCF.isChecked() is True:
-            output_path = QFileDialog.getOpenFileNames(self, "Save Shapefile", "", "Shapefile (.shp)")
+            input_path = QFileDialog.getOpenFileName(self, "Open XYZ File", "", "XYZ File (*.xyz)")
+
+        if len(input_path[0]) != 0:
+            self.leInputCF.setText(str(input_path[0]))
+
+
+    def __get_cf_output(self):
+        if self.rbLasToXyzCF.isChecked() is True:
+            output_path = QFileDialog.getSaveFileName(self, "Save XYZ File", "", "XYZ File (*.xyz)")
+
+        elif self.rbXyzToShpCF.isChecked() is True:
+            output_path = QFileDialog.getSaveFileName(self, "Save Shapefile", "", "Shapefile (*.shp)")
 
         if len(output_path[0]) != 0:
-            output_path = output_path[0]
-            self.leOutputCF.setText(str(output_path))
+            self.leOutputCF.setText(str(output_path[0]))
 
 
     def __cf__extension_handler(self):
