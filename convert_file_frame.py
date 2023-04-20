@@ -19,9 +19,9 @@ class ConvertFileFrame(ttk.LabelFrame):
 
     def __create_widgets(self):
         #radio buttons
-        self.first_option = ttk.Radiobutton(self, text="XYZ from LAS", variable=self.radio_option, value=0, command=lambda: self.__extension_handler())
+        self.first_option = ttk.Radiobutton(self, text="LAS to XYZ", variable=self.radio_option, value=0, command=lambda: self.__extension_handler())
         self.first_option.grid(column=0, row=0, sticky='E', ipadx=5)
-        self.second_option = ttk.Radiobutton(self, text="SHP from XYZ", variable=self.radio_option, value=1, command=lambda: self.__extension_handler())
+        self.second_option = ttk.Radiobutton(self, text="XYZ to SHP", variable=self.radio_option, value=1, command=lambda: self.__extension_handler())
         self.second_option.grid(column=1, row=0, sticky='W', ipadx=5)
 
         #input entry

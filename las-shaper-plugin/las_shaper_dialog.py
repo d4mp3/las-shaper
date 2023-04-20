@@ -77,10 +77,15 @@ class LasShaperDialog(QtWidgets.QDialog, FORM_CLASS):
         self.rbXyzMF.toggled.connect(lambda: self.__mf__extension_handler())
 
         # Convert files frame
-        self.tbInputCF.clicked.connect(self.__set_mf_input)
-        self.tbOutputCF.clicked.connect(self.__get_mf_output)
+        self.tbInputCF.clicked.connect(self.__get_cf_input)
+        self.tbOutputCF.clicked.connect(self.__set_cf_output)
         self.pbCF.clicked.connect(self.__run_convert_files)
-        self.rbXyzFromShpCF.setChecked(True)
+        self.rbLasToXyzCF.setChecked(True)
+        self.cf_input_extension = "(.las)"
+        self.cf_output_extension = "(.xyz)"
+        self.leInputCF.setText(f"Input path {self.cf_input_extension}")
+        self.leOutputCF.setText(f"Output path {self.cf_output_extension}")
+        self.rbLasToXyzCF.toggled.connect(lambda: self.__cf__extension_handler())
 
 
     def __get_elc_input(self):
@@ -181,7 +186,7 @@ class LasShaperDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def __get_mf_output(self):
         if self.rbXyzMF.isChecked() is True:
-            output_path = QFileDialog.getOpenFileNames(self, "Open XYZ File", "", "XYZ Files (*.xyz)")
+            output_path = QFileDialog.getOpenFileNames(self, "Open XYZ Files", "", "XYZ Files (*.xyz)")
 
         elif self.rbShpMF.isChecked() is True:
             output_path = QFileDialog.getOpenFileNames(self, "Open Shapefiles", "", "Shapefiles (.shp)")
@@ -206,7 +211,7 @@ class LasShaperDialog(QtWidgets.QDialog, FORM_CLASS):
 
 
     def __run_merge_files(self):
-        if self.leInputMF != '' and self.leOutputMF != '':
+        if self.leInputCF != '' and self.leOutputCF != '':
             if self.rbXyzMF.isChecked() is True:
                 merge_xyz_files(self.leInputMF.text(),  self.leOutputMF.text())
 
@@ -217,12 +222,50 @@ class LasShaperDialog(QtWidgets.QDialog, FORM_CLASS):
             print('invalid input or output path!')
 
     def __get_cf_input(self):
-        ...
+        if self.rbXyzMF.isChecked() is True:
+            input_path = QFileDialog.getOpenFileNames(self, "Open XYZ File", "", "XYZ File (*.xyz)")
+
+        elif self.rbShpMF.isChecked() is True:
+            input_path = QFileDialog.getOpenFileNames(self, "Open Shapefile", "", "Shapefile (.shp)")
+
+        if len(input_path[0]) != 0:
+            input_path = input_path[0]
+            self.leInputMF.setText(str(input_path))
 
 
     def __set_cf_output(self):
-        ...
+        if self.rbLasToXyzCF.isChecked() is True:
+            output_path = QFileDialog.getOpenFileName(self, "Save XYZ File", "", "XYZ File (*.xyz)")
+
+        elif self.rbXyzToShpCF.isChecked() is True:
+            output_path = QFileDialog.getOpenFileNames(self, "Save Shapefile", "", "Shapefile (.shp)")
+
+        if len(output_path[0]) != 0:
+            output_path = output_path[0]
+            self.leOutputCF.setText(str(output_path))
+
+
+    def __cf__extension_handler(self):
+        if self.rbLasToXyzCF.isChecked() is True:
+            self.cf_input_extension = "(.las)"
+            self.cf_output_extension = "(.xyz)"
+
+        elif self.rbXyzToShpCF.isChecked() is True:
+            self.cf_input_extension = "(.xyz)"
+            self.cf_output_extension = "(.shp)"
+
+
+        self.leInputCF.setText(f"Input path {self.cf_input_extension}")
+        self.leOutputCF.setText(f"Output path {self.cf_output_extension}")
 
 
     def __run_convert_files(self):
-        ...
+        if self.leInputCF != '' and self.leOutputCF != '':
+            if self.rbLasToXyzCF.isChecked() is True:
+                create_xyz_from_las(self.leInputCF.text(), self.leOutputCF.text())
+
+            elif self.rbXyzToShpCF.isChecked() is True:
+                create_shp_from_xyz(self.leInputCF.text(), self.leOutputCF.text())
+
+        else:
+            print('invalid input or output path!')
