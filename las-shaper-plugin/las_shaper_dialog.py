@@ -65,17 +65,22 @@ class LasShaperDialog(QtWidgets.QDialog, FORM_CLASS):
         self.tbOutputGMH.clicked.connect(self.__set_gmh_output)
         self.pbGMH.clicked.connect(self.__run_get_max_height)
 
-
         # Merge files frame
         self.tbInputMF.clicked.connect(self.__set_mf_input)
         self.tbOutputMF.clicked.connect(self.__get_mf_output)
         self.pbMF.clicked.connect(self.__run_merge_files)
-
+        self.rbXyzMF.setChecked(True)
+        self.mf_input_extension = "(.xyz)"
+        self.mf_output_extension = "(.xyz)"
+        self.leInputMF.setText(f"Input path {self.mf_input_extension}")
+        self.leOutputMF.setText(f"Output path {self.mf_output_extension}")
+        self.rbXyzMF.toggled.connect(lambda: self.__mf__extension_handler())
 
         # Convert files frame
         self.tbInputCF.clicked.connect(self.__set_mf_input)
         self.tbOutputCF.clicked.connect(self.__get_mf_output)
         self.pbCF.clicked.connect(self.__run_convert_files)
+        self.rbXyzFromShpCF.setChecked(True)
 
 
     def __get_elc_input(self):
@@ -162,16 +167,54 @@ class LasShaperDialog(QtWidgets.QDialog, FORM_CLASS):
 
 
     def __set_mf_input(self):
-        ...
+        if self.rbXyzMF.isChecked() is True:
+            input_path = QFileDialog.getOpenFileNames(self, "Open XYZ File", "", "XYZ Files (*.xyz)")
+
+        elif self.rbShpMF.isChecked() is True:
+            input_path = QFileDialog.getOpenFileNames(self, "Open Shapefiles", "", "Shapefiles (.shp)")
+
+        if len(input_path[0]) != 0:
+            input_path = input_path[0]
+            input_path = '; '.join(input_path)
+            self.leInputMF.setText(str(input_path))
 
 
     def __get_mf_output(self):
-        ...
+        if self.rbXyzMF.isChecked() is True:
+            output_path = QFileDialog.getOpenFileNames(self, "Open XYZ File", "", "XYZ Files (*.xyz)")
+
+        elif self.rbShpMF.isChecked() is True:
+            output_path = QFileDialog.getOpenFileNames(self, "Open Shapefiles", "", "Shapefiles (.shp)")
+
+        if len(output_path[0]) != 0:
+            output_path = output_path[0]
+            self.leOutputMF.setText(str(output_path))
+
+
+    def __mf__extension_handler(self):
+        if self.rbXyzMF.isChecked() is True:
+            self.mf_input_extension = "(.xyz)"
+            self.mf_output_extension = "(.xyz)"
+
+        elif self.rbShpMF.isChecked() is True:
+            self.mf_input_extension = "(.shp)"
+            self.mf_output_extension = "(.shp)"
+
+
+        self.leInputMF.setText(f"Input path {self.mf_input_extension}")
+        self.leOutputMF.setText(f"Output path {self.mf_output_extension}")
 
 
     def __run_merge_files(self):
-        ...
+        if self.leInputMF != '' and self.leOutputMF != '':
+            if self.rbXyzMF.isChecked() is True:
+                merge_xyz_files(self.leInputMF.text(),  self.leOutputMF.text())
 
+            elif self.rbShpMF.isChecked() is True:
+                merge_shp_files(self.leInputMF.text(),  self.leOutputMF.text())
+
+        else:
+            print('invalid input or output path!')
 
     def __get_cf_input(self):
         ...
